@@ -1,0 +1,146 @@
+\name{georamps}
+\alias{georamps}
+\alias{print.ramps}
+
+\title{Bayesian Geostatistical Model Fitting with RAMPS}
+
+\description{
+   Generic function for fitting Bayesian geostatistical models using the reparameterized and marginalized posterior sampling (RAMPS) algorithm of Yan et al. (2007).
+}
+
+\usage{
+   georamps(fixed, random, correlation, data, subset, weights,
+            variance = list(fixed = ~ 1, random = ~ 1, spatial = ~ 1),
+            aggregate = list(grid = NULL, blockid = ""),
+            control = ramps.control(\dots), contrast = NULL, \dots)
+}
+
+\arguments{
+   \item{fixed}{two-sided linear \code{"formula"} object describing the main effects in the mean structure of the model, with the response on the left of a \code{~} operator and the terms, separated by \code{+} operators, on the right.}
+
+   \item{random}{optional one-sided formula of the form \code{~ 1 | g}, specifying random intercepts for groups defined by the factor \code{g}. Several grouping variables may be simultaneously specified, separated by the \code{*} operator, as in \code{~ 1 | g1 * g2 * g3}. In such cases, the levels of each variable are pasted together and the resulting factor used to group the observations.  Missing \code{NA} values may be given in the grouping variable to omit random effects for the associated measurements.}
+
+   \item{correlation}{\code{corSpatial} object describing the spatial correlation structure.  See the \code{corClasses} documentation for a listing of the available structures.}
+
+   \item{data}{optional data frame containing the variables named in fixed, random, correlation, weights, variance, and subset.}
+
+   \item{subset}{optional expression indicating the subset of row in \code{data} that should be used in the fit. This can be a logical vector, or a numerical vector indicating which observation numbers are to be included, or a character vector of the row names to be included. All observations are included by default.}
+
+   \item{weights}{optional numerical vector of weights to be used in the fitting process. Defaults to a value of 1 for point-source measurements and the number of grid points for areal measurements (see the \code{aggregate} argument below).}
+
+   \item{variance}{optional list of one-sided formulas, each of the form \code{~ g} where \code{g} defines a grouping factor for the following elements: \code{fixed} for measurement error variances; \code{random} for random effects error variances; and \code{spatial} for spatial variances.  A single variance is assumed in each case by default.}
+
+   \item{aggregate}{optional list of elements: \code{grid} a data frame of coordinates to use for Monte Carlo integration over geographic blocks at which areal measurements are available; and \code{blockid} a character string specifying the column by which to merge the areal measurements in \code{data} with the grid coordinates in \code{grid}.  Merging is only performed for \code{blockid} values that are common to both datasets.  All observations in \code{data} are treated as point-source measurements by default.}
+
+   \item{control}{list of parameters for controlling the fitting process. See the \code{ramps.control} documentation for details.}
+
+   \item{contrast}{optional list. See the \code{contrasts.arg} of \code{model.matrix}.}
+
+   \item{\dots}{further arguments passed to or from other methods.}
+}
+
+\value{
+   A list of class \code{"ramps"} containing the following components:
+   \item{params}{\code{"mcmc"} object of monitored model parameters with variable labels in the column names and MCMC iteration numbers in the row names.}
+   \item{z}{\code{"mcmc"} object of monitored latent spatial parameters with variable labels in the column names and MCMC iteration numbers in the row names.}
+   \item{coords}{matrix of unique coordinates for the measurement and grid sites.}
+   \item{loglik}{data log-likelihood at each MCMC iteration.}
+   \item{y}{response vector.}
+   \item{xmat}{design matrix for the main effects.}
+   \item{etype}{grouping factor for the measurement error variances.}
+   \item{weights}{weights used in the fitting process.}
+   \item{correlation}{specified \code{corStruct} object for the spatial correlation structure.}
+   \item{kmat}{matrix for mapping the spatial parameters to the observed data.}
+   \item{ztype}{grouping factor for the spatial variances.}
+   \item{wmat}{matrix for mapping the random effects to the observed data.}
+   \item{retype}{grouping factor for the random effects variances.}
+   \item{control}{a list of control parameters used in the fitting process.}
+   \item{evals}{total number of evaluations of the slice sampling routine.}
+   \item{call}{the matched function call to \code{georamps}.}
+}
+
+\references{
+   Yan, J., Cowles, M.K., Wang, S., and Armstrong, M. (2007) \dQuote{Parallelizing MCMC for Bayesian Spatiotemporal Geostatistical Models}, Statistics and Computing, in press.
+}
+
+\author{
+   Brian Smith \email{brian-j-smith@uiowa.edu}, Jun Yan \email{jun.yan@uconn.edu}, and Kate Cowles \email{kate-cowles@uiowa.edu}}
+
+\seealso{
+   \code{\link{corClasses}},
+   \code{\link{ramps.control}},
+   \code{\link[stats]{model.matrix}},
+   \code{\link[coda]{mcmc}},
+   \code{\link{DIC.ramps}},
+   \code{\link{predict.ramps}},
+   \code{\link{summary.ramps}}
+}
+
+\examples{
+## Load the included uranium datasets for use in this example
+data(NURE)
+
+## Geostatistical analysis of areal measurements
+NURE.ctrl1 <- ramps.control(
+   iter = 25,
+   beta = param(0, "flat"),
+   sigma2.e = param(1, "invgamma", shape = 2.0, scale = 0.1, tuning = 0.75),
+   phi = param(10, "uniform", min = 0, max = 35, tuning = 0.50),
+   sigma2.z = param(1, "invgamma", shape = 2.0, scale = 0.1)
+)
+
+NURE.fit1 <- georamps(log(ppm) ~ 1,
+   correlation = corRExp(form = ~ lon + lat, metric="haversine"),
+   weights = area,
+   data = NURE,
+   subset = (measurement == 1),
+   aggregate = list(grid = NURE.grid, blockid = "id"),
+   control = NURE.ctrl1
+)
+print(NURE.fit1)
+summary(NURE.fit1)
+
+
+## Analysis of point-source measurements
+NURE.ctrl2 <- ramps.control(
+   iter = 25,
+   beta = param(0, "flat"),
+   sigma2.e = param(1, "invgamma", shape = 2.0, scale = 0.1, tuning = 0.75),
+   phi = param(10, "uniform", min = 0, max = 35, tuning = 0.5),
+   sigma2.z = param(1, "invgamma", shape = 2.0, scale = 0.1)
+)
+
+NURE.fit2 <- georamps(log(ppm) ~ 1,
+   correlation = corRExp(form = ~ lon + lat, metric="haversine"),
+   data = NURE,
+   subset = (measurement == 2),
+   control = NURE.ctrl2
+)
+print(NURE.fit2)
+summary(NURE.fit2)
+
+
+## Joint analysis of areal and point-source measurements with
+## prediction only at grid sites
+NURE.ctrl <- ramps.control(
+   iter = 25,
+   beta = param(rep(0, 2), "flat"),
+   sigma2.e = param(rep(1, 2), "invgamma", shape = 2.0, scale = 0.1, tuning = 0.75),
+   phi = param(10, "uniform", min = 0, max = 35, tuning = 0.5),
+   sigma2.z = param(1, "invgamma", shape = 2.0, scale = 0.1),
+   z.monitor = NURE.grid
+)
+
+NURE.fit <- georamps(log(ppm) ~ factor(measurement) - 1,
+   correlation = corRExp(form = ~ lon + lat, metric="haversine"),
+   variance = list(fixed = ~ measurement),
+   weights = area * (measurement == 1) + (measurement == 2),
+   data = NURE,
+   aggregate = list(grid = NURE.grid, blockid = "id"),
+   control = NURE.ctrl
+)
+print(NURE.fit)
+summary(NURE.fit)
+}
+
+\keyword{models}

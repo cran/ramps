@@ -1,0 +1,20 @@
+citHeader("To cite ramps in publications use:")
+
+
+citEntry(entry="Article",
+         title = "Parallelizing MCMC for Bayesian Spatiotemporal Geostatistical Models",
+         author = personList(as.person("Jun Yan"),
+                             as.person("Mary Katherine Cowles"),
+	                     as.person("Shaowen Wang"),
+                             as.person("Marc P. Armstrong")),
+         year         = "2007",
+         journal      = "Statistics and Computing",
+         volume       = "17",
+         pages        = "",
+         textVersion = 
+         paste("Yan, J., Cowles, M. K., Wang, S., and Armstrong, M. P. (2007)",
+               "Parallelizing MCMC for Bayesian Spatiotemporal Geostatistical Models",
+               "Statistics and Computing, 17(4), pp.")
+)
+
+
