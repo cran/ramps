@@ -4,7 +4,7 @@
 \title{Powered Exponential Spatial Correlation Structure}
 
 \description{
-   This function is a constructor for the \code{corRExpwr} class, representing a powered exponential spatial correlation structure. Letting \eqn{r} denote the range, \eqn{p} the shape, and \eqn{n} the nugget effect, the correlation between two observations a distance \eqn{d} apart is \eqn{\exp(-(d/r)^p)}{exp(-(d/r)^p)} when no nugget effect is present and \eqn{(1-n) \exp(-(d/r)^p)}{(1-n)*exp(-(d/r)^p)} when a nugget effect is assumed.
+   This function is a constructor for the \code{'corRExpwr'} class, representing a powered exponential spatial correlation structure. Letting \eqn{r} denote the range, \eqn{p} the shape, and \eqn{n} the nugget effect, the correlation between two observations a distance \eqn{d} apart is \eqn{\exp(-(d/r)^p)}{exp(-(d/r)^p)} when no nugget effect is present and \eqn{(1-n) \exp(-(d/r)^p)}{(1-n)*exp(-(d/r)^p)} when a nugget effect is assumed.
 }
 
 \usage{
@@ -28,7 +28,7 @@
 }
 
 \value{
-   Object of class \code{corRExpwr}, also inheriting from class \code{corSpatial}, representing a powered exponential spatial correlation structure.
+   Object of class \code{'corRExpwr'}, also inheriting from class \code{'corSpatial'}, representing a powered exponential spatial correlation structure.
 }
 
 \references{

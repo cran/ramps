@@ -5,14 +5,14 @@
 \title{Bayesian Geostatistical Model Fitting with RAMPS}
 
 \description{
-   Generic function for fitting Bayesian geostatistical models using the reparameterized and marginalized posterior sampling (RAMPS) algorithm of Yan et al. (2007).
+   General function for fitting Bayesian geostatistical models using the reparameterized and marginalized posterior sampling (RAMPS) algorithm of Yan et al. (2007).
 }
 
 \usage{
    georamps(fixed, random, correlation, data, subset, weights,
             variance = list(fixed = ~ 1, random = ~ 1, spatial = ~ 1),
             aggregate = list(grid = NULL, blockid = ""),
-            control = ramps.control(\dots), contrast = NULL, \dots)
+            control = ramps.control(\dots), contrasts = NULL, \dots)
 }
 
 \arguments{
@@ -20,7 +20,7 @@
 
    \item{random}{optional one-sided formula of the form \code{~ 1 | g}, specifying random intercepts for groups defined by the factor \code{g}. Several grouping variables may be simultaneously specified, separated by the \code{*} operator, as in \code{~ 1 | g1 * g2 * g3}. In such cases, the levels of each variable are pasted together and the resulting factor used to group the observations.  Missing \code{NA} values may be given in the grouping variable to omit random effects for the associated measurements.}
 
-   \item{correlation}{\code{corSpatial} object describing the spatial correlation structure.  See the \code{corClasses} documentation for a listing of the available structures.}
+   \item{correlation}{\code{'corSpatial'} object describing the spatial correlation structure.  See the \code{corClasses} documentation for a listing of the available structures.}
 
    \item{data}{optional data frame containing the variables named in fixed, random, correlation, weights, variance, and subset.}
 
@@ -34,29 +34,31 @@
 
    \item{control}{list of parameters for controlling the fitting process. See the \code{ramps.control} documentation for details.}
 
-   \item{contrast}{optional list. See the \code{contrasts.arg} of \code{model.matrix}.}
+   \item{contrasts}{optional list. See the \code{contrasts.arg} of \code{\link[stats]{model.matrix}}.}
 
    \item{\dots}{further arguments passed to or from other methods.}
 }
 
 \value{
-   A list of class \code{"ramps"} containing the following components:
-   \item{params}{\code{"mcmc"} object of monitored model parameters with variable labels in the column names and MCMC iteration numbers in the row names.}
-   \item{z}{\code{"mcmc"} object of monitored latent spatial parameters with variable labels in the column names and MCMC iteration numbers in the row names.}
-   \item{coords}{matrix of unique coordinates for the measurement and grid sites.}
+   An object of class \code{'ramps'} containing the following elements:
+   \item{params}{\code{'mcmc'"} object of monitored model parameters with variable labels in the column names and MCMC iteration numbers in the row names.}
+   \item{z}{\code{'mcmc'} object of monitored latent spatial parameters with variable labels in the column names and MCMC iteration numbers in the row names.}
    \item{loglik}{data log-likelihood at each MCMC iteration.}
+   \item{evals}{total number of evaluations of the slice sampling routine.}
+   \item{call}{the matched function call to \code{georamps}.}
    \item{y}{response vector.}
    \item{xmat}{design matrix for the main effects.}
+   \item{terms}{the \code{'terms'} object for \code{xmat}.}
+   \item{xlevels}{list of the factor levels for \code{xmat}.}
    \item{etype}{grouping factor for the measurement error variances.}
    \item{weights}{weights used in the fitting process.}
-   \item{correlation}{specified \code{corStruct} object for the spatial correlation structure.}
    \item{kmat}{matrix for mapping the spatial parameters to the observed data.}
+   \item{correlation}{specified \code{'corSpatial'} object for the spatial correlation structure.}
+   \item{coords}{matrix of unique coordinates for the measurement and grid sites.}
    \item{ztype}{grouping factor for the spatial variances.}
    \item{wmat}{matrix for mapping the random effects to the observed data.}
    \item{retype}{grouping factor for the random effects variances.}
    \item{control}{a list of control parameters used in the fitting process.}
-   \item{evals}{total number of evaluations of the slice sampling routine.}
-   \item{call}{the matched function call to \code{georamps}.}
 }
 
 \references{
@@ -69,11 +71,12 @@
 \seealso{
    \code{\link{corClasses}},
    \code{\link{ramps.control}},
-   \code{\link[stats]{model.matrix}},
    \code{\link[coda]{mcmc}},
    \code{\link{DIC.ramps}},
+   \code{\link{plot.ramps}},
    \code{\link{predict.ramps}},
-   \code{\link{summary.ramps}}
+   \code{\link{summary.ramps}},
+   \code{\link{window.ramps}}
 }
 
 \examples{
@@ -90,7 +93,7 @@ NURE.ctrl1 <- ramps.control(
 )
 
 NURE.fit1 <- georamps(log(ppm) ~ 1,
-   correlation = corRExp(form = ~ lon + lat, metric="haversine"),
+   correlation = corRExp(form = ~ lon + lat, metric = "haversine"),
    weights = area,
    data = NURE,
    subset = (measurement == 1),
@@ -111,7 +114,7 @@ NURE.ctrl2 <- ramps.control(
 )
 
 NURE.fit2 <- georamps(log(ppm) ~ 1,
-   correlation = corRExp(form = ~ lon + lat, metric="haversine"),
+   correlation = corRExp(form = ~ lon + lat, metric = "haversine"),
    data = NURE,
    subset = (measurement == 2),
    control = NURE.ctrl2
@@ -132,7 +135,7 @@ NURE.ctrl <- ramps.control(
 )
 
 NURE.fit <- georamps(log(ppm) ~ factor(measurement) - 1,
-   correlation = corRExp(form = ~ lon + lat, metric="haversine"),
+   correlation = corRExp(form = ~ lon + lat, metric = "haversine"),
    variance = list(fixed = ~ measurement),
    weights = area * (measurement == 1) + (measurement == 2),
    data = NURE,

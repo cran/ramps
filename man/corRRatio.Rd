@@ -4,7 +4,7 @@
 \title{Rational Quadratic Spatial Correlation Structure}
 
 \description{
-   This function is a constructor for the \code{corRRatio} class, representing a rational quadratic spatial correlation structure. Letting \eqn{r} denote the range and \eqn{n} the nugget effect, the correlation between two observations a distance \eqn{d} apart is \eqn{1/(1+(d/r)^2)} when no nugget effect is present and \eqn{(1-n)(1/(1+(d/r)^2)}{(1-n)*1/(1+(d/r)^2)} when a nugget effect is assumed.
+   This function is a constructor for the \code{'corRRatio'} class, representing a rational quadratic spatial correlation structure. Letting \eqn{r} denote the range and \eqn{n} the nugget effect, the correlation between two observations a distance \eqn{d} apart is \eqn{1/(1+(d/r)^2)} when no nugget effect is present and \eqn{(1-n)(1/(1+(d/r)^2)}{(1-n)*1/(1+(d/r)^2)} when a nugget effect is assumed.
 }
 
 \usage{
@@ -28,7 +28,7 @@
 }
 
 \value{
-   Object of class \code{corRRatio}, also inheriting from class \code{corSpatial}, representing a rational quadratic spatial correlation structure.
+   Object of class \code{'corRRatio'}, also inheriting from class \code{'corSpatial'}, representing a rational quadratic spatial correlation structure.
 }
 
 \references{

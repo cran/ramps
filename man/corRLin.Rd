@@ -4,7 +4,7 @@
 \title{Linear Spatial Correlation Structure}
 
 \description{
-   This function is a constructor for the \code{corRLin} class, representing a linear spatial correlation structure. Letting \eqn{r} denote the range and \eqn{n} the nugget effect, the correlation between two observations a distance \eqn{d < r} apart is \eqn{1-(d/r)} when no nugget effect is present and \eqn{(1-n) (1 -(d/r))}{(1-n)*(1-(d/r))} when a nugget effect is assumed. If \eqn{d \geq r}{d >= r} the correlation is zero.
+   This function is a constructor for the \code{'corRLin'} class, representing a linear spatial correlation structure. Letting \eqn{r} denote the range and \eqn{n} the nugget effect, the correlation between two observations a distance \eqn{d < r} apart is \eqn{1-(d/r)} when no nugget effect is present and \eqn{(1-n) (1 -(d/r))}{(1-n)*(1-(d/r))} when a nugget effect is assumed. If \eqn{d \geq r}{d >= r} the correlation is zero.
 }
 
 \usage{
@@ -28,7 +28,7 @@
 }
 
 \value{
-   Object of class \code{corRLin}, also inheriting from class \code{corSpatial}, representing a linear spatial correlation structure.
+   Object of class \code{'corRLin'}, also inheriting from class \code{'corSpatial'}, representing a linear spatial correlation structure.
 }
 
 \references{

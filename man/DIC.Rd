@@ -2,19 +2,18 @@
 \alias{DIC}
 \alias{DIC.ramps}
 
-\title{Deviance Information Criterion (DIC)}
+\title{Deviance Information Criterion}
 
 \description{
-   Function to calculate DIC for fitted model objects returned by \code{\link{georamps}}.
+   Calculates the Deviance Information Criterion (DIC) for comparisons of \code{georamps} model fits.
 }
 
 \usage{
-   \method{DIC}{ramps}(object, iter, \dots)
+   \method{DIC}{ramps}(object, \dots)
 }
 
 \arguments{
-   \item{object}{fitted model object from georamps.}
-   \item{iter}{optional numerical vector specifying the MCMC iterations to be included in the calculation.  All are included by default.}
+   \item{object}{object returned by \code{georamps}.}
    \item{\dots}{some methods for this generic require additional arguments.  None are used in this method.}
 }
 

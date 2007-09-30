@@ -4,7 +4,7 @@
 \title{Non-Separable Exponential Spatio-Temporal Correlation Structure}
 
 \description{
-   This function is a constructor for the \code{corRExp2} class, representing a non-separable spatial correlation structure. Letting \eqn{rs} denote the spatial range, \eqn{rt} the temporal range, \eqn{lambda} the space-time interaction, and \eqn{n} the nugget effect, the correlation between two observations a distance \eqn{d} apart in space and \eqn{t} in time is \eqn{\exp(-d/rs - t/rt - \lambda (d/rs) (t/rt))}{exp(-d/rs - t/rt - lambda * (d/rs) * (t/rt))} when no nugget effect is present and \eqn{(1-n) \exp(-d/rs - t/rt - \lambda (d/rs) (t/rt))}{(1-n)*exp(-d/rs - t/rt - lambda * (d/rs) * (t/rt))} when a nugget effect is assumed.
+   This function is a constructor for the \code{'corRExp2'} class, representing a non-separable spatial correlation structure. Letting \eqn{rs} denote the spatial range, \eqn{rt} the temporal range, \eqn{lambda} the space-time interaction, and \eqn{n} the nugget effect, the correlation between two observations a distance \eqn{d} apart in space and \eqn{t} in time is \eqn{\exp(-d/rs - t/rt - \lambda (d/rs) (t/rt))}{exp(-d/rs - t/rt - lambda * (d/rs) * (t/rt))} when no nugget effect is present and \eqn{(1-n) \exp(-d/rs - t/rt - \lambda (d/rs) (t/rt))}{(1-n)*exp(-d/rs - t/rt - lambda * (d/rs) * (t/rt))} when a nugget effect is assumed.
 }
 
 \usage{
@@ -28,7 +28,7 @@
 }
 
 \value{
-   Object of class \code{corRExp2}, inheriting from class \code{corSpatioTemporal}, representing a non-separable spatial correlation structure.
+   Object of class \code{'corRExp2'}, inheriting from class \code{'corSpatioTemporal'}, representing a non-separable spatial correlation structure.
 }
 
 \references{

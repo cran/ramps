@@ -3,22 +3,18 @@ DIC <- function(object, ...)
    UseMethod("DIC")
 }
 
-DIC.ramps <- function(object, iter, ...)
+DIC.ramps <- function(object, ...)
 {
-   ## Vector of iterations for the calculation
-   iter <- if (missing(iter)) 1:nrow(object$params)
-           else match.iter(iter, object$params)
-
-	## Posterior parameter means
-   w <- rep(1 / length(iter), length(iter))
-   params <- as.vector(crossprod(w, object$params[iter,]))
+   ## Posterior parameter means
+   w <- rep(1 / nrow(object$params), nrow(object$params))
+   params <- as.vector(crossprod(w, object$params))
    beta <- params2beta(params, object$control)
    phi <- params2phi(params, object$control)
    sigma2 <- params2kappa(params, object$control)
    sigma2.e <- kappa2kappa.e(sigma2, object$control)
    sigma2.re <- kappa2kappa.re(sigma2, object$control)
    sigma2.z <- kappa2kappa.z(sigma2, object$control)
-   loglik <- as.numeric(crossprod(w, object$loglik[iter]))
+   loglik <- as.numeric(crossprod(w, object$loglik))
 
    ## Mean structure and measurement variance
    MU <- object$y - object$xmat %*% beta
@@ -27,7 +23,7 @@ DIC.ramps <- function(object, iter, ...)
    ## Spatial variance
    KMAT <- object$kmat %*%
                  as(Diagonal(x = sqrt(sigma2.z)[object$ztype]), "sparseMatrix")
-   object$correlation[] <- unconstrained(object$correlation, phi) 
+   object$correlation[] <- unconstrained(object$correlation, phi)
    SIGMA <- SIGMA + tcrossprod(KMAT %*% corMatrix(object$correlation), KMAT)
 
    ## Random effects variance

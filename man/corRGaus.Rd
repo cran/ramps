@@ -4,7 +4,7 @@
 \title{Gaussian Spatial Correlation Structure}
 
 \description{
-   This function is a constructor for the \code{corRGaus} class, representing a Gaussian spatial correlation structure. Letting \eqn{r} denote the range and \eqn{n} the nugget effect, the correlation between two observations a distance \eqn{d} apart is \eqn{\exp(-(d/r)^2)}{exp(-(d/r)^2)} when no nugget effect is present and \eqn{(1-n) \exp(-(d/r)^2)}{(1-n)*exp(-(d/r)^2)} when a nugget effect is assumed.
+   This function is a constructor for the \code{'corRGaus'} class, representing a Gaussian spatial correlation structure. Letting \eqn{r} denote the range and \eqn{n} the nugget effect, the correlation between two observations a distance \eqn{d} apart is \eqn{\exp(-(d/r)^2)}{exp(-(d/r)^2)} when no nugget effect is present and \eqn{(1-n) \exp(-(d/r)^2)}{(1-n)*exp(-(d/r)^2)} when a nugget effect is assumed.
 }
 
 \usage{
@@ -28,7 +28,7 @@
 }
 
 \value{
-   Object of class \code{corRGaus}, also inheriting from class \code{corSpatial}, representing a Gaussian spatial correlation structure.
+   Object of class \code{'corRGaus'}, also inheriting from class \code{'corSpatial'}, representing a Gaussian spatial correlation structure.
 }
 
 \references{

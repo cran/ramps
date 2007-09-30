@@ -690,7 +690,7 @@ getCovariate.corSpatioTemporal <- function(object, form = formula(object), data)
                                                     metric, r = radius))
                                x <- matrix(0, r, r)
                                idx <- lower.tri(x)
-                               period <- abs(el[col(x)[idx], tcovar] - 
+                               period <- abs(el[col(x)[idx], tcovar] -
                                              el[row(x)[idx], tcovar])
                             } else {
                                d <- numeric(0)
@@ -712,7 +712,7 @@ getCovariate.corSpatioTemporal <- function(object, form = formula(object), data)
                                             r = attr(object, "radius")))
             x <- matrix(0, nrow(covar), nrow(covar))
             idx <- lower.tri(x)
-            attr(covar, "period") <- abs(covar[col(x)[idx], tcovar] - 
+            attr(covar, "period") <- abs(covar[col(x)[idx], tcovar] -
                                          covar[row(x)[idx], tcovar])
          }
       }
@@ -1015,7 +1015,7 @@ coef.corRExpwr2 <- function(object, unconstrained = TRUE, ...)
 
 ################################################################################
 # corRExpwrDt - Joint powered exponential spatial and integrated exponential
-#              temporal correlation structure
+#               temporal correlation structure
 ################################################################################
 
 corRExpwr2Dt <- function(value = numeric(0), form = ~ 1, nugget = FALSE,

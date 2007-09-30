@@ -4,16 +4,15 @@
 \title{Posterior Summaries of georamps Model Fits}
 
 \description{
-   Posterior summaries of the sampled model parameters returned by \code{\link{georamps}}.
+   Posterior summaries of \code{\link{georamps}} model parameters.
 }
 
 \usage{
-   \method{summary}{ramps}(object, iter, \dots)
+   \method{summary}{ramps}(object, \dots)
 }
 
 \arguments{
-   \item{object}{fitted object returned by \code{georamps}.}
-   \item{iter}{optional numerical vector specifying the MCMC iterations to be included in the summaries.  All are included by default.}
+   \item{object}{object returned by \code{georamps}.}
    \item{\dots}{additional arguments to be passed to \code{summary.mcmc}.}
 }
 

@@ -4,7 +4,7 @@
 \title{Exponential Spatial Correlation Structure}
 
 \description{
-   This function is a constructor for the \code{corRExp} class, representing an exponential spatial correlation structure. Letting \eqn{r} denote the range and \eqn{n} the nugget effect, the correlation between two observations a distance \eqn{d} apart is \eqn{\exp(-d/r)}{exp(-d/r)} when no nugget effect is present and \eqn{(1-n) \exp(-d/r)}{(1-n)*exp(-d/r)} when a nugget effect is assumed.
+   This function is a constructor for the \code{'corRExp'} class, representing an exponential spatial correlation structure. Letting \eqn{r} denote the range and \eqn{n} the nugget effect, the correlation between two observations a distance \eqn{d} apart is \eqn{\exp(-d/r)}{exp(-d/r)} when no nugget effect is present and \eqn{(1-n) \exp(-d/r)}{(1-n)*exp(-d/r)} when a nugget effect is assumed.
 }
 
 \usage{
@@ -28,7 +28,7 @@
 }
 
 \value{
-   Object of class \code{corRExp}, also inheriting from class \code{corSpatial}, representing an exponential spatial correlation structure.
+   Object of class \code{'corRExp'}, also inheriting from class \code{'corSpatial'}, representing an exponential spatial correlation structure.
 }
 
 \references{

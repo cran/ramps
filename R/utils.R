@@ -1,6 +1,80 @@
-##############################################################
-#### Grid point generation for Monte Carlo integration
-##############################################################
+################################################################################
+## window.ramps/window.predict.ramps - Time windows for ramps MCMC output
+################################################################################
+
+window.ramps <- function(x, iter, ...)
+{
+   idx <- match(iter, as.numeric(rownames(x$params)))
+   idx <- sort(unique(idx[!is.na(idx)]))
+
+   if (length(idx) == 0) stop("no matching MCMC iterations")
+
+   x$params <- as.mcmc(x$params[idx, , drop = FALSE])
+   x$z <- as.mcmc(x$z[idx, , drop = FALSE])
+   x$loglik <- x$loglik[idx]
+   x$control$iter <- idx
+
+   x
+}
+
+window.predict.ramps <- function(x, iter, ...)
+{
+   idx <- match(iter, as.numeric(rownames(x)))
+   idx <- sort(unique(idx[!is.na(idx)]))
+
+   if (length(idx) == 0) stop("no matching MCMC iterations")
+
+   structure(x[idx, , drop = FALSE],
+        coords = attr(x, "coords"),
+        class = c("predict.ramps", "matrix"))
+}
+
+
+################################################################################
+## expand.chain - Resumed sampling for a ramps object
+################################################################################
+
+expand.chain <- function(object, n)
+{
+   if (class(object) != "ramps") stop("object must be of class 'ramps'")
+
+   nr <- nrow(object$params)
+   control <- object$control
+
+   ## Set initial values to last sample
+   control$beta$init <- params2beta(object$params[nr,], control)
+   control$phi$init <- params2phi(object$params[nr,], control)
+   val <- params2kappa(object$params[nr,], control)
+   val <- val / sum(val)
+   control$sigma2.e$init <- kappa2kappa.e(val, control)
+   control$sigma2.z$init <- kappa2kappa.z(val, control)
+   control$sigma2.re$init <- kappa2kappa.re(val, control)
+
+   ## Additional iterations to sample
+   control$expand <- max(control$iter)
+   inc <- diff(c(0, control$iter))[nr]
+   control$iter <- seq(inc, n, by = inc)
+
+   val <- ramps.engine(object$y, object$xmat, object$kmat, object$wmat,
+                       object$correlation, object$etype, object$ztype,
+                       object$retype, object$weights, control)
+
+   object$control$iter <- c(object$control$iter, control$expand + control$iter)
+   object$params <- as.mcmc(rbind(object$params, val$params))
+   rownames(object$params) <- object$control$iter
+   object$z <- as.mcmc(rbind(object$z, val$z))
+   rownames(object$z) <- object$iter
+   object$loglik <- c(object$loglik, val$loglik)
+   object$evals <- object$evals + val$evals
+
+   object
+}
+
+
+################################################################################
+## genUSStateGrid/genUSStateSites - Grid point generation for Monte Carlo
+##    integration
+################################################################################
 
 genUSStateGrid <- function(state, incr = NULL, resolution = NULL) {
   mymap <- map('state', state, plot=FALSE)
@@ -22,10 +96,6 @@ genUSStateGrid <- function(state, incr = NULL, resolution = NULL) {
   lat <- seq(lat.range[1], lat.range[2], by = incr[2])
   coords <- expand.grid(lon, lat)
 
-  ## visual check
-  ## map('county', 'iowa')
-  ## points(coords)
-
   ## get county ids
   counties <- map.where('county', coords[,1], coords[,2])
   ## restrict to points in state
@@ -39,7 +109,6 @@ genUSStateGrid <- function(state, incr = NULL, resolution = NULL) {
   grid <- grid[inState,]
   grid
 }
-
 
 genUSStateSites <- function(state, nsites) {
   mymap <- map('state', state, plot=FALSE)
@@ -67,9 +136,9 @@ genUSStateSites <- function(state, nsites) {
 }
 
 
-##############################################################
-#### Parameter extraction
-##############################################################
+################################################################################
+## Parameter extraction
+################################################################################
 
 params2phi <- function(params, control) {
    idx <- seq(length.out = length(control$phi))
@@ -125,9 +194,9 @@ sigma2scale <- function(control)
 }
 
 
-###########################################################
-#### Random number generation
-###########################################################
+################################################################################
+## Random number generation
+################################################################################
 
 rdirichlet <- function (n, alpha) {
    ## taken from MCMCpack
@@ -164,15 +233,9 @@ rmvnorm2 <- function(n, mu, sigma)
 }
 
 
-#############################################################
-#### Data management function
-#############################################################
-
-match.iter <- function(iter, x)
-{
-   idx <- match(iter, as.numeric(rownames(x)))
-   idx[!is.na(idx)]
-}
+################################################################################
+## Data management function
+################################################################################
 
 unique.sites <- function(x)
 {
@@ -185,9 +248,9 @@ unique.sites <- function(x)
 }
 
 
-#############################################################
-#### I/O functions
-#############################################################
+################################################################################
+## I/O functions
+################################################################################
 
 name.ext <- function(name, ext)
 {

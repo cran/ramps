@@ -1,18 +1,19 @@
 ################################################################################
-## mpdensity - marginalized posterior density, up to a constant scale
+## mpdensity/mpdensity2 - Marginalized posterior density, up to a constant scale
 ##
 ## Arguments:
-##    y       - response vector
-##    xmat      the covariate matrix, n by p
-##    xk1mat  - cbind(xmat, k1mat) where 'xmat' is the covariate matrix, and
-##              'k1mat' is such that kmat = k1mat %*% k2mat
-##    k2mat   - unique rows of kmat
-##    wmat    - design matrix of non-spatial random effect
+##    params  - numerical vector of phi and kappa parameter values
+##    y       - numerical response vector (n x 1)
+##    xk1mat  - design Matrix cbind(xmat, k1mat) where 'xmat' is the covariate
+##              Matrix and 'k1mat' is such that kmat = k1mat %*% k2mat
+##    k2mat   - design Matrix giving the unique rows of kmat
+##    wmat    - design Matrix of non-spatial random effect (n by q)
 ##    spcor   - initialized (nlme) spatial correlation structure
-##    etype   - integer vector giving the type of measurement variances
-##    ztype   - integer vector giving the type of spatial variances
-##    retype  - integer vector giving the type of random effect variances
-##    weights - number of observations each observed value is based upon
+##    etype   - factor indexing the measurement variances (n x 1)
+##    ztype   - factor indexing the spatial variances (nz x 1)
+##    retype  - factor indexing the random effect variances (q x 1)
+##    weights - numerical vector by which to weight the measurement error
+##              variance
 ##    control - ramps.control object
 ################################################################################
 
@@ -38,12 +39,13 @@ mpdensity <- function(params, y, xk1mat, k2mat, wmat, spcor, etype, ztype, retyp
    }
 
    KMAT <- k2mat %*% as(Diagonal(x = sqrt(kappa.z)[ztype]), "sparseMatrix")
-   R <- as.matrix(tcrossprod(KMAT %*% corMatrix(spcor), KMAT))
-   uiSIGMA.22 <- as(backsolve(chol(R), diag(nrow(R))), "dtCMatrix")
-   logsqrtdet <- -1 * sum(log(c(diag(uiSIGMA.11), diag(uiSIGMA.22))))
+   uSIGMA.22 <- chol(as.matrix(tcrossprod(KMAT %*% corMatrix(spcor), KMAT)))
+
+   logsqrtdet <- sum(log(diag(uSIGMA.22))) - sum(log(diag(uiSIGMA.11)))
 
    linvX.r1 <- crossprod(uiSIGMA.11, xk1mat)
-   linvX.22 <- -1 * t(uiSIGMA.22)
+   linvX.22 <- as(backsolve(uSIGMA.22, diag(-1, nrow(uSIGMA.22)),
+                            transpose = TRUE), "dtCMatrix")
    linvX <- rBind(linvX.r1, cBind(Matrix(0, nz, p), linvX.22))
    linvY <- rBind(as(crossprod(uiSIGMA.11, y), "dgCMatrix"), Matrix(0, nz, 1))
 
@@ -64,7 +66,7 @@ mpdensity <- function(params, y, xk1mat, k2mat, wmat, spcor, etype, ztype, retyp
                sum((shape + 1.0) * log(kappa))
 
    list(value = loglik, betahat = betahat, quadform = quadform,
-        uXtSiginvX = uXtSiginvX)
+        uXtSiginvX = uXtSiginvX, uSig11inv = uiSIGMA.11)
 }
 
 
@@ -88,14 +90,13 @@ mpdensity2 <- function(params, y, xk1mat, k2mat, wmat, spcor, etype, ztype, rety
       uSIGMA.11 <- as.matrix(chol(SIGMA.11))
    }
 
-   KMAT <- t(k2mat) * sqrt(kappa.z)[ztype]
-   R <- crossprod(KMAT, corMatrix(spcor) %*% KMAT)
-   uSIGMA.22 <- chol(R)
+   tKMAT <- t(k2mat) * sqrt(kappa.z)[ztype]
+   uSIGMA.22 <- chol(crossprod(tKMAT, corMatrix(spcor) %*% tKMAT))
 
    logsqrtdet <- sum(log(c(diag(uSIGMA.11), diag(uSIGMA.22)))) 
 
    linvX.r1 <- backsolve(uSIGMA.11, xk1mat, transpose = TRUE)
-   linvX.22 <- backsolve(uSIGMA.22, diag(-1, nrow(R)), transpose = TRUE)
+   linvX.22 <- backsolve(uSIGMA.22, diag(-1, nrow(uSIGMA.22)), transpose = TRUE)
    linvX <- rbind(linvX.r1, cbind(matrix(0, nz, p), linvX.22))
    linvY <- c(backsolve(uSIGMA.11, y, transpose = TRUE), rep(0, nz))
 
@@ -117,5 +118,5 @@ mpdensity2 <- function(params, y, xk1mat, k2mat, wmat, spcor, etype, ztype, rety
                sum((shape + 1.0) * log(kappa))
 
    list(value = loglik, betahat = betahat, quadform = quadform,
-        uXtSiginvX = uXtSiginvX)
+        uXtSiginvX = uXtSiginvX, uSig11inv = uiSIGMA.11)
 }

@@ -17,7 +17,7 @@
       \item{\code{ppm}}{uranium measurements in parts per million.}
       \item{\code{measurement}}{type of measurement: 1 = areal, 2 = point-source.}
       \item{\code{lon}}{longitude coordinates of point-source measurements.}
-      \item{\code{lat}}{latitude coordinates of the areal measurements.}
+      \item{\code{lat}}{latitude coordinates of point-source measurements.}
       \item{\code{easting}}{Universal Transverse Mercator easting coordinates - projected distances from the central meridian.}
       \item{\code{northing}}{Universal Transverse Mercator northing coordinates - projected distances from the equator.}
       \item{\code{county}}{counties from which measurements were taken.}

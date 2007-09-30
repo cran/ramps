@@ -1,4 +1,4 @@
-import(Matrix, nlme)
+import(Matrix, nlme, stats)
 
 export(
    corRExp,
@@ -16,6 +16,7 @@ export(
 
 export(
    DIC,
+   expand.chain,
    georamps,
    param,
    ramps.control
@@ -66,4 +67,8 @@ S3method(predict, ramps)
 S3method(print, predict.ramps)
 S3method(print, ramps)
 S3method(summary, ramps)
+S3method(plot, predict.ramps)
+S3method(plot, ramps)
 S3method(unconstrained, corSpatial)
+S3method(window, predict.ramps)
+S3method(window, ramps)

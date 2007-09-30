@@ -4,7 +4,7 @@
 \title{Matern Spatial Correlation Structure}
 
 \description{
-   This function is a constructor for the \code{corRMatern} class, representing a Matern spatial correlation structure. Letting \eqn{r} denote the range, \eqn{s} the shape, and \eqn{n} the nugget effect, the correlation between two observations a distance \eqn{d} apart is \eqn{1/(2^{s-1} \Gamma(s)) (d/r)^s K_s(d/r)}{1/(2^(s-1)*gamma(s))*(d/r)^s*besselK(d/r, s)} when no nugget effect is present and \eqn{(1-n) 1/(2^{s-1} \Gamma(s)) (d/r)^s K_s(d/r)}{(1-n)*1/(2^(s-1)*gamma(s))*(d/r)^s*besselK(d/r, s)} when a nugget effect is assumed.
+   This function is a constructor for the \code{'corRMatern'} class, representing a Matern spatial correlation structure. Letting \eqn{r} denote the range, \eqn{s} the shape, and \eqn{n} the nugget effect, the correlation between two observations a distance \eqn{d} apart is \eqn{1/(2^{s-1} \Gamma(s)) (d/r)^s K_s(d/r)}{1/(2^(s-1)*gamma(s))*(d/r)^s*besselK(d/r, s)} when no nugget effect is present and \eqn{(1-n) 1/(2^{s-1} \Gamma(s)) (d/r)^s K_s(d/r)}{(1-n)*1/(2^(s-1)*gamma(s))*(d/r)^s*besselK(d/r, s)} when a nugget effect is assumed.
 }
 
 \usage{
@@ -28,7 +28,7 @@
 }
 
 \value{
-   Object of class \code{corRMatern}, also inheriting from class \code{corSpatial}, representing a Matern spatial correlation structure.
+   Object of class \code{'corRMatern'}, also inheriting from class \code{'corSpatial'}, representing a Matern spatial correlation structure.
 }
 
 \references{

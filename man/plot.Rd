@@ -1,0 +1,54 @@
+\name{plot}
+\alias{plot.ramps}
+\alias{plot.predict.ramps}
+
+\title{Posterior Spatial Distribution Plots}
+
+\description{
+   Creates surface maps of posterior spatial distributions from \code{\link{georamps}} or \code{\link{predict.ramps}}.
+}
+
+\usage{
+   \method{plot}{ramps}(x, type = c("i", "c", "w"), func = mean, sites = FALSE, database = NULL,
+        regions = ".", resolution = c(64, 64), theta = 1, ...)
+
+   \method{plot}{predict.ramps}(x, type = c("i", "c", "w"), func = mean, database = NULL,
+        regions = ".", resolution = c(64, 64), theta = 1, ...)
+}
+
+\arguments{
+   \item{x}{object returned by \code{georamps} or \code{predict.ramps}.}
+   \item{type}{type of plot to produce: \code{"i"} = \code{image.plot} (default), \code{"c"} = \code{contour}, and \code{"w"} = \code{persp} wireframe.}
+   \item{func}{function defining the posterior summary statistic to be plotted.}
+   \item{sites}{logical value indicating whether to include the measurements sites in the plot.}
+   \item{database}{character string naming a geographical database for the mapping of geographic boundaries.  See \code{map} documentation for details.}
+   \item{regions}{character vector naming the polygons to draw.  See \code{map} documentation for details.}
+   \item{resolution}{numerical vector of length 2 specifying the number of pixels (width x height) for the surface image.}
+   \item{theta}{bandwidth used for smoothing the spatial surface.}
+   \item{\dots}{additional arguments passed to the underlying plotting function associated with the specified \code{type} argument.}
+}
+
+\author{
+   Brian Smith \email{brian-j-smith@uiowa.edu}
+}
+
+\seealso{
+   \code{\link{georamps}}
+   \code{\link{predict.ramps}}
+   \code{\link[graphics]{contour}}
+   \code{\link[fields]{image.plot}}
+   \code{\link[graphics]{persp}}
+   \code{\link[maps]{map}}
+}
+
+\examples{
+## Surface maps of the georamps example results
+
+\dontrun{
+plot(NURE.fit, database = "state", regions = "connecticut",
+     resolution = c(200, 150), theta = 0.1,
+     main = "Spatial Process Posterior Mean")
+}
+}
+
+\keyword{models}

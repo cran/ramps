@@ -4,7 +4,7 @@
 \title{Non-Separable Temporally Integrated Powered Exponential Spatial Correlation Structure}
 
 \description{
-   This function is a constructor for the \code{corRExpwr2Dt} class, representing a non-separable spatial correlation structure for temporally integrated measurements. Letting \eqn{rs} denote the spatial range, \eqn{ps} the spatial shape, \eqn{rt} the temporal range, \eqn{lambda} the space-time interaction, and \eqn{n} the nugget effect, the correlation between two observations a distance \eqn{d} apart in space and \eqn{t} in time is \eqn{\exp(-(d/rs)^ps - t/rt - \lambda (d/rs)^ps (t/rt))}{exp(-(d/rs)^ps - t/rt - lambda * (d/rs)^ps * (t/rt))} when no nugget effect is present and \eqn{(1-n) \exp(-(d/rs)^ps - t/rt - \lambda (d/rs)^ps (t/rt))}{(1-n)*exp(-(d/rs)^ps - t/rt - lambda * (d/rs)^ps * (t/rt))} when a nugget effect is assumed.
+   This function is a constructor for the \code{'corRExpwr2Dt'} class, representing a non-separable spatial correlation structure for temporally integrated measurements. Letting \eqn{rs} denote the spatial range, \eqn{ps} the spatial shape, \eqn{rt} the temporal range, \eqn{lambda} the space-time interaction, and \eqn{n} the nugget effect, the correlation between two observations a distance \eqn{d} apart in space and \eqn{t} in time is \eqn{\exp(-(d/rs)^ps - t/rt - \lambda (d/rs)^ps (t/rt))}{exp(-(d/rs)^ps - t/rt - lambda * (d/rs)^ps * (t/rt))} when no nugget effect is present and \eqn{(1-n) \exp(-(d/rs)^ps - t/rt - \lambda (d/rs)^ps (t/rt))}{(1-n)*exp(-(d/rs)^ps - t/rt - lambda * (d/rs)^ps * (t/rt))} when a nugget effect is assumed.
 }
 
 \usage{
@@ -28,7 +28,7 @@
 }
 
 \value{
-   Object of class \code{corRExpwr2Dt}, also inheriting from class \code{corSpatial}, representing a non-separable spatial correlation structure.
+   Object of class \code{'corRExpwr2Dt'}, also inheriting from class \code{'corSpatial'}, representing a non-separable spatial correlation structure.
 }
 
 \references{

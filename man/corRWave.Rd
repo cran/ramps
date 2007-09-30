@@ -4,7 +4,7 @@
 \title{Sine Wave Spatial Correlation Structure}
 
 \description{
-   This function is a constructor for the \code{corRWave} class, representing a sine wave spatial correlation structure. Letting \eqn{r} denote the range and \eqn{n} the nugget effect, the correlation between two observations a distance \eqn{d} apart is \eqn{\sin(d/r)/(d/r)}{sin(d/r)/(d/r)} when no nugget effect is present and \eqn{(1-n) \sin(d/r)/(d/r)}{(1-n)*sin(d/r)/(d/r)} when a nugget effect is assumed.
+   This function is a constructor for the \code{'corRWave'} class, representing a sine wave spatial correlation structure. Letting \eqn{r} denote the range and \eqn{n} the nugget effect, the correlation between two observations a distance \eqn{d} apart is \eqn{\sin(d/r)/(d/r)}{sin(d/r)/(d/r)} when no nugget effect is present and \eqn{(1-n) \sin(d/r)/(d/r)}{(1-n)*sin(d/r)/(d/r)} when a nugget effect is assumed.
 }
 
 \usage{
@@ -28,7 +28,7 @@
 }
 
 \value{
-   Object of class \code{corRWave}, also inheriting from class \code{corSpatial}, representing a sine wave spatial correlation structure.
+   Object of class \code{'corRWave'}, also inheriting from class \code{'corSpatial'}, representing a sine wave spatial correlation structure.
 }
 
 \references{

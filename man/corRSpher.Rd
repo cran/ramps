@@ -4,7 +4,7 @@
 \title{Spherical Spatial Correlation Structure}
 
 \description{
-   This function is a constructor for the \code{corRSpher} class, representing a spherical spatial correlation structure. Letting \eqn{r} denote the range and \eqn{n} the nugget effect, the correlation between two observations a distance \eqn{d < r} apart is \eqn{1-1.5(d/r)+0.5(d/r)^3} when no nugget effect is present and \eqn{(1-n)    (1-1.5(d/r)+0.5(d/r)^3)}{(1-n)*(1-1.5(d/r)+0.5(d/r)^3)} when a nugget effect is assumed. If \eqn{d \geq r}{d >= r} the correlation is zero.
+   This function is a constructor for the \code{'corRSpher'} class, representing a spherical spatial correlation structure. Letting \eqn{r} denote the range and \eqn{n} the nugget effect, the correlation between two observations a distance \eqn{d < r} apart is \eqn{1-1.5(d/r)+0.5(d/r)^3} when no nugget effect is present and \eqn{(1-n)    (1-1.5(d/r)+0.5(d/r)^3)}{(1-n)*(1-1.5(d/r)+0.5(d/r)^3)} when a nugget effect is assumed. If \eqn{d \geq r}{d >= r} the correlation is zero.
 }
 
 \usage{
@@ -28,7 +28,7 @@
 }
 
 \value{
-   An object of class \code{corRSpher}, also inheriting from class \code{corSpatial}, representing a spherical spatial correlation structure.
+   An object of class \code{'corRSpher'}, also inheriting from class \code{'corSpatial'}, representing a spherical spatial correlation structure.
 }
 
 \references{

@@ -4,13 +4,11 @@
 \title{Initialization of georamps Model Parameters}
 
 \description{
-   Function typically used in conjunction with \code{ramps.control} to specify the initial values and prior distributions used in calls to \code{georamps}.
+   Function used in conjunction with \code{ramps.control} to specify the initial values and prior distributions used in calls to \code{georamps}.
 }
 
 \usage{
-   param(init, prior = c("flat", "invgamma", "normal", "uniform"), tuning = 1,
-         monitor = TRUE, \dots)
-
+   param(init, prior = c("flat", "invgamma", "normal", "uniform"), tuning = 1, \dots)
 }
 
 \arguments{
@@ -19,8 +17,6 @@
    \item{prior}{character string specifying the prior distribution.  This must be one of \code{"flat"}, \code{"invgamma"}, \code{"normal"}, or \code{"uniform"}, with default \code{"flat"}, and may be abbreviated to a unique prefix.}
 
    \item{tuning}{numerical values for tuning the MCMC sampler.}
-
-   \item{monitor}{logical indicating parameters to be monitored in the MCMC sampler.  Currently ignored in \code{georamps}.}
 
    \item{\dots}{hyperparameters of the specified prior distribution.  See details below.}
 }
@@ -41,11 +37,10 @@
 }
 
 \value{
-   A list of class \code{"param"} containing the following components:
+   A list of class \code{'param'} containing the following components:
    \item{init}{numerical vector of initial parameter values.}
    \item{prior}{character string specifying the prior distribution.}
    \item{tuning}{numerical vector of tuning values of \code{length(init)}.}
-   \item{monitor}{logical vector of monitoring indicators of \code{length(init)}.}
    \item{\dots}{hyperparameters of the specified prior distribution.}
 }
 

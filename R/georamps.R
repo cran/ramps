@@ -1,23 +1,21 @@
 georamps <- function(fixed, random, correlation, data = sys.frame(sys.parent()),
    subset, weights, variance = list(fixed = ~ 1, random = ~ 1, spatial = ~ 1),
    aggregate = list(grid = NULL, blockid = ""), control = ramps.control(...),
-   contrast = NULL, ...)
+   contrasts = NULL, ...)
 {
-   ## Create data frame containing all relevant variables, except random which
-   ##    is added later
-   Call <- match.call()
-   val <- list(fixed, variance$fixed, variance$random, variance$spatial)
-   if (!is.null(aggregate$grid)) {
-      val <- c(val, asOneSidedFormula(aggregate$blockid))
-   }
+   ## Create data frame containing all relevant variables
+   ## Random effects are added later
+   call <- match.call()
+   val <- c(all.vars(fixed), all.vars(variance$fixed),
+            all.vars(variance$spatial), all.vars(variance$random))
+   if (!is.null(aggregate$grid)) val <- c(val, aggregate$blockid)
    spvars <- all.vars(getCovariateFormula(correlation))
-   val <- c(unlist(lapply(val, "all.vars")), spvars)
-   mfargs <- list(formula = paste("~", paste(val, collapse = "+")),
-                  data = data, weights = Call[["weights"]],
-                  subset = Call[["subset"]], na.action = na.pass)
+   val <- reformulate(c(val, spvars))
+   mfargs <- list(formula = val, data = data, weights = call[["weights"]],
+                  subset = call[["subset"]], na.action = na.pass)
    mfdata <- do.call("model.frame", mfargs)
 
-   ## Zero out point-source coordinates for aggregate measurements
+   ## Zero-out the coordinates for aggregate measurements
    val <- mfdata[,aggregate$blockid]
    if (!is.null(val)) {
       idx <- c(aggregate$blockid, spvars)
@@ -33,13 +31,16 @@ georamps <- function(fixed, random, correlation, data = sys.frame(sys.parent()),
    ## Extract weights
    weights <- model.weights(mfdata)
 
-   ## Initial model frame attributes are no longer needed
+   ## Drop the model frame attributes that are no longer needed
    attr(mfdata, "terms") <- NULL
 
-   # Extract response variable and main effects design matrix
+   # Extract response vector and main effects design matrix
    mf <- model.frame(fixed, data = mfdata, drop.unused.levels = TRUE)
+   mt <- attr(mf, "terms")
    y <- model.response(mf, "numeric")
-   xmat <- Matrix(model.matrix(fixed, mf, contrast), sparse = TRUE)
+   val <- model.matrix(mt, mf, contrasts)
+   xmat <- as(val, "dgCMatrix")
+   attr(xmat, "contrasts") <- attr(val, "contrasts")
 
    ## Indices to map measurement error variances
    variance$fixed <- if (is.null(variance$fixed)) factor(rep(1, nrow(mfdata)))
@@ -50,20 +51,20 @@ georamps <- function(fixed, random, correlation, data = sys.frame(sys.parent()),
       stop("Unspecified correlation structure")
    } else {
       ## Create matrix of unique coordinates for latent parameters
-      spf <- terms(getCovariateFormula(correlation))
-      attr(spf, "intercept") <- 0
+      spt <- terms(getCovariateFormula(correlation))
+      attr(spt, "intercept") <- 0
 
       if (is.null(aggregate$grid)) {
          idx1 <- rep(TRUE, nrow(mfdata))
-         val <- model.matrix(spf, mfdata)
+         val <- model.matrix(spt, mfdata)
          idx2 <- NULL
       } else {
          idx1 <- !is.element(mfdata[,aggregate$blockid],
                              aggregate$grid[,aggregate$blockid])
-         val <- model.matrix(spf, mfdata[idx1,,drop=FALSE])
+         val <- model.matrix(spt, mfdata[idx1,,drop=FALSE])
          idx2 <- is.element(aggregate$grid[,aggregate$blockid],
                             mfdata[,aggregate$blockid])
-         val <- rbind(val, model.matrix(spf, aggregate$grid[idx2,,drop=FALSE]))
+         val <- rbind(val, model.matrix(spt, aggregate$grid[idx2,,drop=FALSE]))
       }
       sites <- unique.sites(val)
 
@@ -158,9 +159,7 @@ georamps <- function(fixed, random, correlation, data = sys.frame(sys.parent()),
            " length ", n)
 
    ## Set a single tuning parameter for the sigma2 parameters
-   val <- sigma2tuning(control)
-   idx <- val != 1
-   val <- ifelse(any(idx), min(val[idx]), 1)
+   val <- min(sigma2tuning(control))
    if (length(control$sigma2.e)) control$sigma2.e$tuning[] <- val
    if (length(control$sigma2.z)) control$sigma2.z$tuning[] <- val
    if (length(control$sigma2.re)) control$sigma2.re$tuning[] <- val
@@ -170,13 +169,13 @@ georamps <- function(fixed, random, correlation, data = sys.frame(sys.parent()),
                        variance$spatial, variance$random, weights, control)
 
    structure(
-      list(params = as.mcmc(val$params),
-           z = if (any(control$z$monitor)) as.mcmc(val$z) else val$z, 
-           coords = sites$coords, loglik = val$loglik,
-           y = y, xmat = xmat, etype = variance$fixed, weights = weights,
-           correlation = correlation, kmat = kmat, ztype = variance$spatial,
-           wmat = wmat, retype = variance$random,
-           control = control, evals = val$evals, call = Call),
+      list(params = as.mcmc(val$params), z = as.mcmc(val$z),
+           loglik = val$loglik, evals = val$evals, call = call, y = y,
+           xmat = xmat, terms = attr(mf, "terms"),
+           xlevels = .getXlevels(mt, mf), etype = variance$fixed,
+           weights = weights, kmat = kmat, correlation = correlation,
+           coords = sites$coords, ztype = variance$spatial, wmat = wmat,
+           retype = variance$random, control = control),
       class = "ramps")
 }
 
@@ -215,21 +214,19 @@ print.ramps <- function(x, ...)
           sep = "")
    }
 
-   rn <- rownames(x$params)
+   n <- nrow(x$params)
+   rn <- rownames(x$params)[1:min(n, 3)]
+   if (n > 4) rn <- c(rn, "...")
+   if (n > 3) rn <- c(rn, rownames(x$params)[n])
    cat("\nMCMC Output\n",
-       " Saved Samples = ", length(rn), " (", paste(rn[1:3], collapse = ", "),
-          ", ..., ", rn[length(rn)], ")\n",
+       " Saved Samples = ", n, " (", paste(rn, collapse = ", "), ")\n",
        " Slice Evaluations = ", x$evals, "\n", sep = "")
 
    invisible(x)
 }
 
 
-summary.ramps <- function(object, iter, ...)
+summary.ramps <- function(object, ...)
 {
-   ## Vector of iterations for the calculation
-   iter <- if (missing(iter)) 1:nrow(object$params)
-           else match.iter(iter, object$params)
-
-   summary(as.mcmc(object$params[iter, , drop=F]), ...)
+   summary(object$params, ...)
 }
