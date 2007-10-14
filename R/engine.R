@@ -35,7 +35,7 @@ ramps.engine <- function(y, xmat, kmat, wmat, spcor, etype, ztype, retype,
    if (nzp > 0) colnames(z) <- paste("z_", 1:nzp, sep="") 
 
    loglik <- structure(rep(NA, length(iter)), names = iter)
-   evals <- 0
+   evals <- structure(rep(NA, length(iter)), names = iter)
 
    ## Initialize external output files
    if (!control$expand) {
@@ -107,7 +107,6 @@ ramps.engine <- function(y, xmat, kmat, wmat, spcor, etype, ztype, retype,
                      retype=retype, weights=weights, control=control)
 
       theta <- curreval$params
-      evals <- evals + curreval$newevals
 
       if (i == iter[idx]) {
          ## Draw variance parameters sigma2 
@@ -116,7 +115,7 @@ ramps.engine <- function(y, xmat, kmat, wmat, spcor, etype, ztype, retype,
          bs2 <- sum(sigma2scale(control) / kappa) + curreval$quadform / 2.0
          sigma2.tot <- 1.0 / rgamma(1, as2, bs2)
 
-         ## Draw beta and z parameters
+         ## Draw beta and z parameters and calculate the likelihood
          BETA <- curreval$betahat + sqrt(sigma2.tot) *
                     solve(curreval$uXtSiginvX, rnorm(length(curreval$betahat)))
          MU <- y - xk1mat %*% BETA
@@ -142,6 +141,10 @@ ramps.engine <- function(y, xmat, kmat, wmat, spcor, etype, ztype, retype,
          z[idx, ] <- val
          write.params(control$expand + i, val, control$file$z)
 
+         ## Save number of new slice evaluations
+         evals[idx] <- curreval$newevals
+
+         ## Advance index for the output structures
          idx <- idx + 1
       }
 

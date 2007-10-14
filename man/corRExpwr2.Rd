@@ -20,11 +20,15 @@
 
    \item{nugget}{optional logical value indicating whether a nugget effect is present. Defaults to \code{FALSE}.  This argument exists for consistency with the \code{nlme} library and should be left set at its default value when used in \code{georamps} since the associated model includes a separate measurement error variance parameter.}
 
-   \item{metric}{optional character string specifying the distance metric to be used. The currently available options are \code{"euclidean"} for the root sum-of-squares of distances;   \code{"maximum"} for the maximum difference; \code{"manhattan"} for the sum of the absolute differences; and \code{"haversine"} for the great circle distance (miles) between latitude/longitude coordinates. Partial matching of arguments is used, so only the first three characters need to be provided. Defaults to \code{"euclidean"}.}
+   \item{metric}{optional character string specifying the distance metric to be used. The currently available options are \code{"euclidean"} for the root sum-of-squares of distances;   \code{"maximum"} for the maximum difference; \code{"manhattan"} for the sum of the absolute differences; and \code{"haversine"} for the great circle distance (miles) between longitude/latitude coordinates. Partial matching of arguments is used, so only the first three characters need to be provided. Defaults to \code{"euclidean"}.}
 
    \item{radius}{radius to be used in the haversine formula for great circle distance.  Defaults to the Earth's radius of 3,956 miles.}
 
    \item{fixed}{optional logical value indicating whether the coefficients should be allowed to vary or be kept fixed at their initial value. This argument exists for consistency with the \code{nlme} library and is ignored in the \code{ramps} algorithm.}
+}
+
+\note{
+   When \code{"haversine"} is used as the distance metric, longitude and latitude coordinates must be given as the first and second covariates, respectively, in the formula specification for the \code{form} argument.
 }
 
 \value{
@@ -57,10 +61,6 @@ corMatrix(cs1Expwr)
 cs2Expwr <- corRExpwr2(c(1, 1, 1, 1, 1), form = ~ x + y + t, metric = "man")
 cs2Expwr <- Initialize(cs2Expwr, spatDat)
 corMatrix(cs2Expwr)
-
-cs3Expwr <- corRExpwr2(c(1, 1, 1, 1, 1, 0.2), form = ~ x + y + t, nugget = TRUE)
-cs3Expwr <- Initialize(cs3Expwr, spatDat)
-corMatrix(cs3Expwr)
 }
 
 \keyword{models}

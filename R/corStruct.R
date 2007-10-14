@@ -1289,6 +1289,7 @@ dist2 <- function(x, method = c("euclidean", "maximum", "manhattan", "canberra",
 }
 
 # Great circle distance
+# Coordinates specified as cbind(longitude, latidute)
 haversine <- function(x, y, r = 3956)
 {
    if(is.vector(x)) x <- matrix(x, 1, 2)
@@ -1296,7 +1297,7 @@ haversine <- function(x, y, r = 3956)
 
    rad <- pi / 180
    z <- sin((y - x) * (rad / 2))^2
-   a <- z[,1] + cos(rad * x[,1]) * cos(rad * y[,1]) * z[,2]
+   a <- z[,2] + cos(rad * x[,2]) * cos(rad * y[,2]) * z[,1]
    2 * r * atan2(sqrt(a), sqrt(1 - a))
 }
 

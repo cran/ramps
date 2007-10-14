@@ -42,7 +42,11 @@ plot.default <- function(z, coords, type, func, sites, database, regions,
    val <- as.image(mu, x = coords, nrow = resolution[2], ncol = resolution[1])
    z <- image.smooth(val$z, dx = val$x[2] - val$x[1], dy = val$y[2] - val$y[1],
                      theta = theta)
+
    args <- list(x = val$x, y = val$y, z = z, ...)
+   val <- colnames(coords)
+   if (is.null(args$xlab)) args$xlab <- val[1]
+   if (is.null(args$ylab)) args$ylab <- val[2]
 
    switch(type,
       i = plotname <- "image.plot",
@@ -54,8 +58,6 @@ plot.default <- function(z, coords, type, func, sites, database, regions,
    )
 
    if (is.null(database)) {
-      if (is.null(args$xlab)) args$xlab <- "x"
-      if (is.null(args$ylab)) args$ylab <- "y"
       do.call(plotname, args)
    } else {
       outline <- map(database, regions, plot=F)
@@ -76,11 +78,9 @@ plot.default <- function(z, coords, type, func, sites, database, regions,
       val <- range(outline$x, na.rm = T)
       if (is.null(args$xlim))
          args$xlim <- val + c(-0.025, 0.025) * abs(diff(val))
-      if (is.null(args$xlab)) args$xlab <- "longitude"
       val <- range(outline$y, na.rm = T)
       if (is.null(args$ylim))
          args$ylim <- val + c(-0.025, 0.025) * abs(diff(val)) 
-      if (is.null(args$ylab)) args$ylab <- "latitude"
 
       val <- do.call(plotname, args)
       if (plotname == "persp") {

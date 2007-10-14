@@ -7,11 +7,12 @@ window.ramps <- function(x, iter, ...)
    idx <- match(iter, as.numeric(rownames(x$params)))
    idx <- sort(unique(idx[!is.na(idx)]))
 
-   if (length(idx) == 0) stop("no matching MCMC iterations")
+   if (length(idx) == 0) stop("No matching MCMC iterations")
 
    x$params <- as.mcmc(x$params[idx, , drop = FALSE])
    x$z <- as.mcmc(x$z[idx, , drop = FALSE])
    x$loglik <- x$loglik[idx]
+   x$evals <- x$evals[idx]
    x$control$iter <- idx
 
    x
@@ -22,7 +23,7 @@ window.predict.ramps <- function(x, iter, ...)
    idx <- match(iter, as.numeric(rownames(x)))
    idx <- sort(unique(idx[!is.na(idx)]))
 
-   if (length(idx) == 0) stop("no matching MCMC iterations")
+   if (length(idx) == 0) stop("No matching MCMC iterations")
 
    structure(x[idx, , drop = FALSE],
         coords = attr(x, "coords"),
@@ -36,7 +37,7 @@ window.predict.ramps <- function(x, iter, ...)
 
 expand.chain <- function(object, n)
 {
-   if (class(object) != "ramps") stop("object must be of class 'ramps'")
+   if (class(object) != "ramps") stop("Object must be of class 'ramps'")
 
    nr <- nrow(object$params)
    control <- object$control
@@ -65,7 +66,7 @@ expand.chain <- function(object, n)
    object$z <- as.mcmc(rbind(object$z, val$z))
    rownames(object$z) <- object$iter
    object$loglik <- c(object$loglik, val$loglik)
-   object$evals <- object$evals + val$evals
+   object$evals <- c(object$evals, val$evals)
 
    object
 }
@@ -225,7 +226,7 @@ rmvnorm2 <- function(n, mu, sigma)
       stop("sigma must be a square matrix")
    }
    if (length(mu) != nrow(sigma)) {
-      stop("mean and sigma have non-conforming size")
+      stop("mu and sigma have non-conforming size")
    }
 
    matrix(rnorm(n * m), nrow=n, ncol=m) %*% chol(sigma) +

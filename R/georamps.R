@@ -20,7 +20,7 @@ georamps <- function(fixed, random, correlation, data = sys.frame(sys.parent()),
    if (!is.null(val)) {
       idx <- c(aggregate$blockid, spvars)
       if (!all(idx %in% colnames(aggregate$grid)))
-         stop("coordinates and 'blockid' must be given in 'grid'")
+         stop("Coordinates and 'blockid' must be given in 'grid'")
       aggregate$grid <- na.omit(aggregate$grid[,idx])
       mfdata[is.element(val, aggregate$grid[,aggregate$blockid]), spvars] <- 0
    }
@@ -220,7 +220,7 @@ print.ramps <- function(x, ...)
    if (n > 3) rn <- c(rn, rownames(x$params)[n])
    cat("\nMCMC Output\n",
        " Saved Samples = ", n, " (", paste(rn, collapse = ", "), ")\n",
-       " Slice Evaluations = ", x$evals, "\n", sep = "")
+       " Slice Evaluations = ", sum(x$evals), "\n", sep = "")
 
    invisible(x)
 }

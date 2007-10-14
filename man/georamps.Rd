@@ -43,8 +43,8 @@
    An object of class \code{'ramps'} containing the following elements:
    \item{params}{\code{'mcmc'"} object of monitored model parameters with variable labels in the column names and MCMC iteration numbers in the row names.}
    \item{z}{\code{'mcmc'} object of monitored latent spatial parameters with variable labels in the column names and MCMC iteration numbers in the row names.}
-   \item{loglik}{data log-likelihood at each MCMC iteration.}
-   \item{evals}{total number of evaluations of the slice sampling routine.}
+   \item{loglik}{vector of data log-likelihood values at each MCMC iteration.}
+   \item{evals}{vector of slice sampler evaluations at each MCMC iteration.}
    \item{call}{the matched function call to \code{georamps}.}
    \item{y}{response vector.}
    \item{xmat}{design matrix for the main effects.}

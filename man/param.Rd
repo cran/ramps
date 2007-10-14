@@ -8,7 +8,8 @@
 }
 
 \usage{
-   param(init, prior = c("flat", "invgamma", "normal", "uniform"), tuning = 1, \dots)
+   param(init, prior = c("flat", "invgamma", "normal", "uniform"), tuning = 1,
+         \dots)
 }
 
 \arguments{
@@ -28,7 +29,7 @@
 
       \item{\code{"invgamma"}}{Inverse-gamma with hyperparameters \code{shape > 0} and \code{scale > 0} such that \eqn{f(x) = scale^{shape} / \Gamma(shape) x^{-shape - 1} \exp(-scale / x)}{f(x) = scale^shape / gamma(shape) * x^{-shape - 1} * exp(-scale / x)}.}
 
-      \item{\code{"normal"}}{Normal with hyperparameters \code{mean} and \code{variance} such that \eqn{f(x) = (2 \pi)^{-n/2} |variance|^{-1/2} \exp(-1/2 (x - mean)' variance^{-1} (x - mean))}{(2*pi)^(-n/2) * det(variance)^(-1/2) * exp(-1/2 * t(x - mean) \%*\% solve(variance) \%*\% (x - mean))}. The \code{variance} hyperparameter must be positive definite and may be supplied either as a vector (independence) or a matrix.}
+      \item{\code{"normal"}}{Normal with hyperparameters \code{mean} and \code{variance} such that \eqn{f(x) = (2 \pi)^{-n/2} |\Sigma|^{-1/2} \exp(-1/2 (x - \mu)' \Sigma^{-1} (x - \mu))}{(2*pi)^(-n/2) * det(variance)^(-1/2) * exp(-1/2 * t(x - mean) \%*\% solve(variance) \%*\% (x - mean))}. The \code{variance} hyperparameter must be positive definite and may be supplied either as a vector (independence) or a matrix.}
 
       \item{\code{"uniform"}}{Uniform with hyperparameters \code{min} and \code{max > min} such that \eqn{f(x) = 1 / (max - min)}{f(x) = 1 / (max - min)}.}
    }
