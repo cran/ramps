@@ -43,15 +43,16 @@ ramps.engine <- function(y, xmat, kmat, wmat, spcor, etype, ztype, retype,
       write.header(colnames(z), control$file$z)
    }
 
-   ## Construct matrix components for mpdensity
-   val <- unique.sites(as.matrix(kmat))
-   k2mat <- as(val$coords, "dgCMatrix")
-   xk1mat <- cBind(xmat, as(model.matrix(~ factor(val$idx) - 1), "dgCMatrix"))
-
+   ## Indicies of spatial parameters to monitor
+   sites <- unique.sites(as.matrix(kmat))
    zidx <- seq(length.out = nzp)
-   idx <- match(zidx, as.vector((val$coords == 1) %*% 1:ncol(kmat)))
+   idx <- match(zidx, as.vector((sites$coords == 1) %*% 1:ncol(kmat)))
+
+   ## Determine whether additional prediction is needed for spatial parameters
    if (any(is.na(idx))) {
-      pred <- TRUE
+      pred <- "mpdpred"
+
+      ## Indices for sampled spatial paramters from mpdpred
       zidx <- p + zidx
 
       ## Extract matrix components for mpdpred
@@ -70,7 +71,7 @@ ramps.engine <- function(y, xmat, kmat, wmat, spcor, etype, ztype, retype,
       ## Reorder remaining data structures by idx
       y <- y[idx]
       if (ncol(xmat) > 0) xmat <- xmat[idx, , drop = FALSE]
-      xk1mat <- xk1mat[idx, , drop = FALSE]
+      sites$idx <- sites$idx[idx]
       if (ncol(wmat) > 0) wmat <- wmat[idx, , drop = FALSE]
       weights <- weights[idx]
       etype <- etype[idx]
@@ -85,53 +86,92 @@ ramps.engine <- function(y, xmat, kmat, wmat, spcor, etype, ztype, retype,
                                  as(Diagonal(x = rep(-1, nzp)), "sparseMatrix")
       }
       if (nzp > 0 && ny2 > 0) X[(ny1 + 1):n, (p + 1):(p + nzp)] <- k21mat
+   } else if ((nzp > 0) && (control$mpdfun != "mpdbetaz")) {
+      pred <- "mpdbetaz"
+
+      ## Indices for sampled spatial paramters from mpdensity
+      zidx <- p + idx
+
+      ## Construct matrices for mpdensity
+      xk1mat <- cBind(xmat, as(model.matrix(~ factor(sites$idx) - 1), "dgCMatrix"))
+      k2mat <- as(sites$coords, "dgCMatrix")
    } else {
-      pred <- FALSE
+      pred <- ""
+
+      ## Indices for slice sampled spatial paramters
       zidx <- p + idx
    }
 
-   ## First mpdensity evaluation
-   val <- sigma2init(control)
-   theta <- c(control$phi$init, val / sum(val))
-   curreval <- mpdensity(theta, y, xk1mat, k2mat, wmat, spcor, etype, ztype,
-                         retype, weights, control)
+   ## List of arguments for mpdensity call
+   args <- list(theta = c(control$phi$init, prop.table(sigma2init(control))),
+                y = y, wmat = wmat, spcor = spcor,
+                etype = etype, ztype = ztype, retype = retype,
+                weights = weights, control = control)
+   switch(control$mpdfun,
+      mpdbeta = {
+         args$xmat <- xmat
+         args$kmat <- kmat
+      },
+      mpdbetaz = {
+         args$xk1mat <-
+            cBind(xmat, as(model.matrix(~ factor(sites$idx) - 1), "dgCMatrix"))
+         args$k2mat <- as(sites$coords, "dgCMatrix")
+      }
+   )
 
+   ## First mpdensity evaluation
+   curreval <- do.call(control$mpdfun, args)
+
+   ## Arguments for subsequent slice sampler calls
+   args$mpdfun <- get(control$mpdfun)
+   args$log <- TRUE
+   args$f.theta <- curreval$value
+
+   ## Main MCMC sampler loop
    idx <- 1
    cat("MCMC Sampler Progress (N = ", control$expand + max(iter), "):\n",
        control$expand, sep = "")
    for (i in 1:max(iter)) {
       ## Draw phi and kappa
-      curreval <- sliceSimplex(x=theta, mpdfun=mpdensity, log=TRUE,
-                     fx=curreval$value, y=y, xk1mat=xk1mat, k2mat=k2mat,
-                     wmat=wmat, spcor=spcor, etype=etype, ztype=ztype,
-                     retype=retype, weights=weights, control=control)
+      curreval <- do.call("sliceSimplex", args)
 
-      theta <- curreval$params
+      args$theta <- curreval$theta
+      args$f.theta <- curreval$value
 
       if (i == iter[idx]) {
-         ## Draw variance parameters sigma2 
-         kappa <- params2kappa(theta, control)
+         ## Draw variance parameters sigma2
+         kappa <- params2kappa(args$theta, control)
          as2 <- sum(sigma2shape(control)) + (n - p) / 2.0
-         bs2 <- sum(sigma2scale(control) / kappa) + curreval$quadform / 2.0
+         bs2 <- sum(sigma2scale(control) / kappa) + sum(curreval$quadform) / 2.0
          sigma2.tot <- 1.0 / rgamma(1, as2, bs2)
 
-         ## Draw beta and z parameters and calculate the likelihood
-         BETA <- curreval$betahat + sqrt(sigma2.tot) *
-                    solve(curreval$uXtSiginvX, rnorm(length(curreval$betahat)))
-         MU <- y - xk1mat %*% BETA
-         uiSIGMA <- curreval$uSig11inv / sqrt(sigma2.tot) 
-         loglik[idx] <- sum(log(diag(uiSIGMA))) -
-                           as.numeric(crossprod(crossprod(uiSIGMA, MU))) / 2.0
+         ## Draw beta parameters and calculate the likelihood
+         BETA <- curreval$betahat
+         val <- rnorm(length(BETA), sd = sqrt(sigma2.tot))
+         if (length(val) > 0) BETA <- BETA + solve(curreval$uXtSiginvX, val)
 
-         if (pred) {
-            val <- mpdpred(theta, Y, X, k22mat, wmat, spcor, etype, ztype,
-                           retype, weights, control)
-            BETA <- val$betahat + sqrt(sigma2.tot) *
-                       solve(val$uXtSiginvX, rnorm(length(val$betahat)))
-         }
+         loglik[idx] <- -0.5 * n * log(sigma2.tot) - curreval$logsqrtdet -
+                           (curreval$quadform[1] + crossprod(val)) /
+                           (2.0 * sigma2.tot)
+
+         ## Draw z parameters if not already done so
+         switch(pred,
+            mpdbetaz = {
+               val <- mpdbetaz(args$theta, y, xk1mat, k2mat, wmat, spcor,
+                               etype, ztype, retype, weights, control)
+               BETA <- val$betahat + solve(val$uXtSiginvX,
+                              rnorm(length(val$betahat), sd = sqrt(sigma2.tot)))
+            },
+            mpdpred = {
+               val <- mpdpred(args$theta, Y, X, k22mat, wmat, spcor, etype,
+                              ztype, retype, weights, control)
+               BETA <- val$betahat + solve(val$uXtSiginvX,
+                              rnorm(length(val$betahat), sd = sqrt(sigma2.tot)))
+            }
+         )
 
          ## Save model parameters
-         val <- c(params2phi(theta, control), sigma2.tot * kappa,
+         val <- c(params2phi(args$theta, control), sigma2.tot * kappa,
                   BETA[seq(length.out = p)])
          params[idx, ] <- val
          write.params(control$expand + i, val, control$file$params)
@@ -152,6 +192,6 @@ ramps.engine <- function(y, xmat, kmat, wmat, spcor, etype, ztype, retype,
    }
    cat("\n")
 
-   list(params = params, z = z, loglik = loglik - (n / 2.0 * log(2.0 * pi)),
+   list(params = params, z = z, loglik = loglik - 0.5 * n * log(2.0 * pi),
         evals = evals)
 }

@@ -61,7 +61,7 @@ mpdpred <- function(params, Y, X, k22mat, wmat, spcor, etype, ztype, retype,
    ## END: uiSIGMA.11
 
    ## BEGIN: uiSIGMA.22
-   spcor[] <- unconstrained(spcor, phi)
+   coef(spcor) <- phi
    vroot <- sqrt(kappa.z)[ztype]
    SigmaZ <- as(vroot * t(corMatrix(spcor) * vroot), "dgCMatrix")
 

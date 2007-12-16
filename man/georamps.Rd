@@ -22,9 +22,9 @@
 
    \item{correlation}{\code{'corSpatial'} object describing the spatial correlation structure.  See the \code{corClasses} documentation for a listing of the available structures.}
 
-   \item{data}{optional data frame containing the variables named in fixed, random, correlation, weights, variance, and subset.}
+   \item{data}{optional data frame containing the variables named in \code{fixed}, \code{random}, \code{correlation}, \code{weights}, \code{variance}, and \code{subset}.}
 
-   \item{subset}{optional expression indicating the subset of row in \code{data} that should be used in the fit. This can be a logical vector, or a numerical vector indicating which observation numbers are to be included, or a character vector of the row names to be included. All observations are included by default.}
+   \item{subset}{optional expression indicating the subset of rows in \code{data} that should be used in the fit. This can be a logical vector, or a numerical vector indicating which observation numbers are to be included, or a character vector of the row names to be included. All observations are included by default.}
 
    \item{weights}{optional numerical vector of weights to be used in the fitting process. Defaults to a value of 1 for point-source measurements and the number of grid points for areal measurements (see the \code{aggregate} argument below).}
 
@@ -62,7 +62,7 @@
 }
 
 \references{
-   Yan, J., Cowles, M.K., Wang, S., and Armstrong, M. (2007) \dQuote{Parallelizing MCMC for Bayesian Spatiotemporal Geostatistical Models}, Statistics and Computing, in press.
+   Yan, J., Cowles, M.K., Wang, S., and Armstrong, M. (2007) \dQuote{Parallelizing MCMC for Bayesian Spatiotemporal Geostatistical Models}, \emph{Statistics and Computing}, in press.
 }
 
 \author{

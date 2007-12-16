@@ -4,6 +4,7 @@ export(
    corRExp,
    corRExpwr,
    corRGaus,
+   corRGneit,
    corRLin,
    corRMatern,
    corRRatio,
@@ -29,8 +30,9 @@ export(
 
 ## for testing
 ## export(
+##    mpdbeta,
+##    mpdbetaz,
 ##    mpdpred,
-##    mpdensity,
 ##    ramps.engine
 ## )
 
@@ -41,7 +43,11 @@ S3method(coef, corRExpwr2Dt)
 S3method(coef, corRMatern)
 S3method(coef, corSpatial)
 S3method(coef, corSpatioTemporal)
+S3method("coef<-", corRExp2)
+S3method("coef<-", corRExpwr2)
+S3method("coef<-", corRExpwr2Dt)
 S3method("coef<-", corSpatial)
+S3method("coef<-", corSpatioTemporal)
 S3method(corFactor, corRExpwr2Dt)
 S3method(corFactor, corSpatial)
 S3method(corFactor, corSpatioTemporal)
@@ -64,11 +70,11 @@ S3method(Initialize, corSpatial)
 S3method(Initialize, corSpatioTemporal)
 S3method(length, param)
 S3method(predict, ramps)
+S3method(print, corStruct)
 S3method(print, predict.ramps)
 S3method(print, ramps)
 S3method(summary, ramps)
 S3method(plot, predict.ramps)
 S3method(plot, ramps)
-S3method(unconstrained, corSpatial)
 S3method(window, predict.ramps)
 S3method(window, ramps)

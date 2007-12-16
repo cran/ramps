@@ -1,13 +1,12 @@
 ################################################################################
-## mpdensity/mpdensity2 - Marginalized posterior density, up to a constant scale
+## mpdbeta - Marginalized posterior density, up to a constant scale
 ##
 ## Arguments:
-##    params  - numerical vector of phi and kappa parameter values
+##    theta   - numerical vector of phi and kappa parameter values
 ##    y       - numerical response vector (n x 1)
-##    xk1mat  - design Matrix cbind(xmat, k1mat) where 'xmat' is the covariate
-##              Matrix and 'k1mat' is such that kmat = k1mat %*% k2mat
-##    k2mat   - design Matrix giving the unique rows of kmat
-##    wmat    - design Matrix of non-spatial random effect (n by q)
+##    xmat    - design Matrix of covariates (n x p)
+##    kmat    - design Matrix of spatial random effects (n x nz)
+##    wmat    - design Matrix of non-spatial random effect (n x q)
 ##    spcor   - initialized (nlme) spatial correlation structure
 ##    etype   - factor indexing the measurement variances (n x 1)
 ##    ztype   - factor indexing the spatial variances (nz x 1)
@@ -17,17 +16,87 @@
 ##    control - ramps.control object
 ################################################################################
 
-mpdensity <- function(params, y, xk1mat, k2mat, wmat, spcor, etype, ztype, retype,
-                      weights, control)
+mpdbeta <- function(theta, y, xmat, kmat, wmat, spcor, etype, ztype, retype,
+                    weights, control)
 {
-   spcor[] <- unconstrained(spcor, params2phi(params, control))
-   kappa <- params2kappa(params, control)
+   coef(spcor) <- params2phi(theta, control)
+   kappa <- params2kappa(theta, control)
    kappa.e <- kappa2kappa.e(kappa, control)
    kappa.z <- kappa2kappa.z(kappa, control)
    kappa.re <- kappa2kappa.re(kappa, control)
 
    p <- length(control$beta)
+
+   KMAT <- kmat %*% as(Diagonal(x = sqrt(kappa.z)[ztype]), "sparseMatrix")
+   SIGMA <- Diagonal(x = kappa.e[etype] / weights) +
+               tcrossprod(KMAT %*% corMatrix(spcor), KMAT)
+   if(ncol(wmat) > 0) {
+      SIGMA <- SIGMA + tcrossprod(wmat %*%
+                  as(Diagonal(x = sqrt(kappa.re)[retype]), "sparseMatrix"))
+   }
+   uSIGMA <- chol(as.matrix(SIGMA))
+
+   if (p > 0) {
+      linvX <- backsolve(uSIGMA, xmat, transpose = TRUE)
+      linvY <- backsolve(uSIGMA, y, transpose = TRUE)
+      XtSiginvX <- crossprod(linvX)
+      XtSiginvY <- crossprod(linvX, linvY)
+
+      uXtSiginvX <- chol(XtSiginvX)
+      betahat <- chol2inv(uXtSiginvX) %*% XtSiginvY
+      quadform <- as.numeric(crossprod(linvY - linvX %*% betahat))
+   } else {
+      linvY <- backsolve(uSIGMA, y, transpose = TRUE)
+
+      uXtSiginvX <- matrix(NA, 0, 0)
+      betahat <- numeric(0)
+      quadform <- as.numeric(crossprod(linvY))
+   }
+
+   logsqrtdet <- sum(log(diag(uSIGMA)))
+
+   shape <- sigma2shape(control)
+   loglik <- -logsqrtdet - sum(log(diag(uXtSiginvX))) -
+               (sum(shape) + (length(y) - p) / 2.0) *
+               log(quadform / 2.0 + sum(sigma2scale(control) / kappa)) -
+               sum((shape + 1.0) * log(kappa))
+
+   list(value = loglik, betahat = betahat, quadform = quadform,
+        uXtSiginvX = uXtSiginvX, logsqrtdet = logsqrtdet)
+}
+
+
+################################################################################
+## mpdbetaz/m - Marginalized posterior density, up to a constant scale
+##
+## Arguments:
+##    theta   - numerical vector of phi and kappa parameter values
+##    y       - numerical response vector (n x 1)
+##    xk1mat  - design Matrix cbind(xmat, k1mat) where 'xmat' is the covariate
+##              Matrix and 'k1mat' is such that kmat = k1mat %*% k2mat
+##    k2mat   - design Matrix giving the unique rows of kmat
+##    wmat    - design Matrix of non-spatial random effect (n x q)
+##    spcor   - initialized (nlme) spatial correlation structure
+##    etype   - factor indexing the measurement variances (n x 1)
+##    ztype   - factor indexing the spatial variances (nz x 1)
+##    retype  - factor indexing the random effect variances (q x 1)
+##    weights - numerical vector by which to weight the measurement error
+##              variance
+##    control - ramps.control object
+################################################################################
+
+mpdbetaz <- function(theta, y, xk1mat, k2mat, wmat, spcor, etype, ztype, retype,
+                     weights, control)
+{
+   coef(spcor) <- params2phi(theta, control)
+   kappa <- params2kappa(theta, control)
+   kappa.e <- kappa2kappa.e(kappa, control)
+   kappa.z <- kappa2kappa.z(kappa, control)
+   kappa.re <- kappa2kappa.re(kappa, control)
+
+   n <- length(y)
    nz <- nrow(k2mat)
+   p <- length(control$beta)
 
    if (ncol(wmat) == 0) {
       uiSIGMA.11 <- as(as(Diagonal(x = sqrt(weights / kappa.e[etype])),
@@ -41,8 +110,6 @@ mpdensity <- function(params, y, xk1mat, k2mat, wmat, spcor, etype, ztype, retyp
    KMAT <- k2mat %*% as(Diagonal(x = sqrt(kappa.z)[ztype]), "sparseMatrix")
    uSIGMA.22 <- chol(as.matrix(tcrossprod(KMAT %*% corMatrix(spcor), KMAT)))
 
-   logsqrtdet <- sum(log(diag(uSIGMA.22))) - sum(log(diag(uiSIGMA.11)))
-
    linvX.r1 <- crossprod(uiSIGMA.11, xk1mat)
    linvX.22 <- as(backsolve(uSIGMA.22, diag(-1, nrow(uSIGMA.22)),
                             transpose = TRUE), "dtCMatrix")
@@ -50,73 +117,21 @@ mpdensity <- function(params, y, xk1mat, k2mat, wmat, spcor, etype, ztype, retyp
    linvY <- rBind(as(crossprod(uiSIGMA.11, y), "dgCMatrix"), Matrix(0, nz, 1))
 
    XtSiginvX <- crossprod(linvX)
-   uXtSiginvX <- chol(XtSiginvX)
-   logsqrtdetXtSiginvX <- sum(log(diag(uXtSiginvX)))
    XtSiginvY <- crossprod(linvX, linvY)
 
+   uXtSiginvX <- chol(XtSiginvX)
    betahat <- solve(XtSiginvX, XtSiginvY)
+   resid <- as.vector(linvY - linvX %*% betahat)
+   quadform <- c(crossprod(resid[1:n]), crossprod(resid[(n+1):(n+nz)]))
 
-   resids <- linvY - linvX %*% betahat
-   quadform <- as.numeric(crossprod(resids))
+   logsqrtdetinv <- sum(log(diag(uiSIGMA.11)))
 
    shape <- sigma2shape(control)
-   loglik <- -logsqrtdet - logsqrtdetXtSiginvX -
-               (sum(shape) + (length(y) - p) / 2.0) *
-               log(quadform / 2.0 + sum(sigma2scale(control) / kappa)) -
+   loglik <- logsqrtdetinv - sum(log(diag(uSIGMA.22))) -
+               sum(log(diag(uXtSiginvX))) - (sum(shape) + (n - p) / 2.0) *
+               log(sum(quadform) / 2.0 + sum(sigma2scale(control) / kappa)) -
                sum((shape + 1.0) * log(kappa))
 
    list(value = loglik, betahat = betahat, quadform = quadform,
-        uXtSiginvX = uXtSiginvX, uSig11inv = uiSIGMA.11)
-}
-
-
-mpdensity2 <- function(params, y, xk1mat, k2mat, wmat, spcor, etype, ztype, retype,
-                       weights, control)
-{
-   spcor[] <- unconstrained(spcor, params2phi(params, control))
-   kappa <- params2kappa(params, control)
-   kappa.e <- kappa2kappa.e(kappa, control)
-   kappa.z <- kappa2kappa.z(kappa, control)
-   kappa.re <- kappa2kappa.re(kappa, control)
-
-   p <- length(control$beta)
-   nz <- nrow(k2mat)
-
-   if (ncol(wmat) == 0) {
-      uSIGMA.11 <- diag(sqrt(kappa.e[etype] / weights))
-   } else {
-      SIGMA.11 <- Diagonal(x = kappa.e[etype] / weights) + tcrossprod(wmat %*%
-                     as(Diagonal(x = sqrt(kappa.re)[retype]), "sparseMatrix"))
-      uSIGMA.11 <- as.matrix(chol(SIGMA.11))
-   }
-
-   tKMAT <- t(k2mat) * sqrt(kappa.z)[ztype]
-   uSIGMA.22 <- chol(crossprod(tKMAT, corMatrix(spcor) %*% tKMAT))
-
-   logsqrtdet <- sum(log(c(diag(uSIGMA.11), diag(uSIGMA.22)))) 
-
-   linvX.r1 <- backsolve(uSIGMA.11, xk1mat, transpose = TRUE)
-   linvX.22 <- backsolve(uSIGMA.22, diag(-1, nrow(uSIGMA.22)), transpose = TRUE)
-   linvX <- rbind(linvX.r1, cbind(matrix(0, nz, p), linvX.22))
-   linvY <- c(backsolve(uSIGMA.11, y, transpose = TRUE), rep(0, nz))
-
-   XtSiginvX <- crossprod(linvX)
-   uXtSiginvX <- chol(XtSiginvX)
-   logsqrtdetXtSiginvX <- sum(log(diag(uXtSiginvX)))
-
-   XtSiginvY <- crossprod(linvX, linvY)
-
-   betahat <- chol2inv(uXtSiginvX) %*% XtSiginvY
-
-   resids <- linvY - linvX %*% betahat
-   quadform <- as.numeric(crossprod(resids))
-
-   shape <- sigma2shape(control)
-   loglik <- -logsqrtdet - logsqrtdetXtSiginvX -
-               (sum(shape) + (length(y) - p) / 2.0) *
-               log(quadform / 2.0 + sum(sigma2scale(control) / kappa)) -
-               sum((shape + 1.0) * log(kappa))
-
-   list(value = loglik, betahat = betahat, quadform = quadform,
-        uXtSiginvX = uXtSiginvX, uSig11inv = uiSIGMA.11)
+        uXtSiginvX = uXtSiginvX, logsqrtdet = -1.0 * logsqrtdetinv)
 }

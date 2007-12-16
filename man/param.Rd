@@ -17,7 +17,7 @@
 
    \item{prior}{character string specifying the prior distribution.  This must be one of \code{"flat"}, \code{"invgamma"}, \code{"normal"}, or \code{"uniform"}, with default \code{"flat"}, and may be abbreviated to a unique prefix.}
 
-   \item{tuning}{numerical values for tuning the MCMC sampler.}
+   \item{tuning}{positive numerical values for tuning the MCMC sampler.}
 
    \item{\dots}{hyperparameters of the specified prior distribution.  See details below.}
 }

@@ -20,10 +20,14 @@
 \details{
 }
 
-\value{The numerical DIC value.}
+\value{
+   An numeric vector with the following two elements:
+   \item{DIC}{value of the Deviance Information Criterion.}
+   \item{pD}{effective number of model parameters.}
+}
 
 \references{
-   Spiegelhalter, D.J., Best, N.G., Carlin, B.P., and van der Linde, A. (2002) \dQuote{Bayesian Measures of Model Complexity and Fit}, Journal of the Royal Statistical Society - Series B, 64, 583-639.
+   Spiegelhalter, D.J., Best, N.G., Carlin, B.P., and van der Linde, A. (2002) \dQuote{Bayesian Measures of Model Complexity and Fit}, \emph{Journal of the Royal Statistical Society - Series B}, 64, 583-639.
 }
 
 \author{

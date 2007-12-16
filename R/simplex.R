@@ -34,22 +34,22 @@ shrinkSimplex <- function(bx, bc, cx, cc, vertices)
 }
 
 
-sliceSimplex <- function(x, mpdfun, log=FALSE, fx, control, ...)
-## x:      current point
-## mpdfun: marginalized posterior density up to a scale or additive constant
-## log:    work on log fun or not
-## fx:     fun(x)
+sliceSimplex <- function(theta, mpdfun, log=FALSE, f.theta, control, ...)
+## theta:    current point
+## mpdfun:   marginalized posterior density up to a scale or additive constant
+## log:      work on log fun or not
+## f.theta:  mpdfun(theta)
 {
-   y <- ifelse(log, fx - rexp(1), runif(1, 0, fx))
+   y <- ifelse(log, f.theta - rexp(1), runif(1, 0, f.theta))
 
    ## interval for generating phi
-   phi.old <- params2phi(x, control)
+   phi.old <- params2phi(theta, control)
    width <- (control$phi$max - control$phi$min) * control$phi$tuning
    l <- phi.old - runif(length(phi.old), 0, width)
    r <- l + width
 
    ## simplex for generating kappa
-   kappa.old <- params2kappa(x, control)
+   kappa.old <- params2kappa(theta, control)
    vertices <- makeFirstSimplex(kappa.old, control)
    kappa.old.b <- solve(vertices, kappa.old)
 
@@ -75,7 +75,7 @@ sliceSimplex <- function(x, mpdfun, log=FALSE, fx, control, ...)
 
          ## here is the only exit of the loop
          if (y < evalresult$value) {
-            evalresult$params <- cand
+            evalresult$theta <- cand
             evalresult$newevals <- newevals
             return(evalresult)
          }

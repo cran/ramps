@@ -69,15 +69,16 @@ predict.ramps <- function(object, newdata, ...)
          beta <- params2beta(object$params[i,], object$control)
          z <- k2mat %*% object$z[i,]
       } else {
-         mpd <- mpdensity(object$params[i,], object$y, xk1mat, k2mat, object$wmat,
-                          object$correlation, object$etype, object$ztype,
-                          object$retype, object$weights, object$control)
+         mpd <- mpdbetaz(object$params[i,], object$y, xk1mat, k2mat,
+                         object$wmat, object$correlation, object$etype,
+                         object$ztype, object$retype, object$weights,
+                         object$control)
          BETA <- mpd$betahat + solve(mpd$uXtSiginvX, rnorm(p + nz))
          beta <- BETA[seq(length.out = p)] 
          z <- BETA[seq(p + 1, length.out = nz)]
       }
 
-      correlation[] <- unconstrained(correlation, phi[i,])
+      coef(correlation) <- phi[i,]
       R <- corMatrix(correlation)
       KMAT <- k2mat %*% as(Diagonal(x = sigma.z[i, object$ztype]), "sparseMatrix")
       R11 <- as.matrix(tcrossprod(KMAT %*% R[1:n1, 1:n1], KMAT))

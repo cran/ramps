@@ -1,5 +1,6 @@
 ramps.control <- function(iter = 1000, beta, sigma2.e, phi, sigma2.z, sigma2.re,
-                          z.monitor = TRUE, file)
+                          z.monitor = TRUE, mpdfun = c("mpdbeta", "mpdbetaz"),
+                          file)
 {
    iter <- as.integer(iter)
    if (any(iter <= 0)) stop("Only positive integers allowed for 'iter'")
@@ -44,8 +45,9 @@ ramps.control <- function(iter = 1000, beta, sigma2.e, phi, sigma2.z, sigma2.re,
       }
    }
 
-   list(beta = beta, sigma2.e = sigma2.e, phi = phi, sigma2.z = sigma2.z,
-        sigma2.re = sigma2.re, z = list(monitor = z.monitor), iter = iter,
+   list(iter = iter, beta = beta, sigma2.e = sigma2.e, phi = phi,
+        sigma2.z = sigma2.z, sigma2.re = sigma2.re,
+        z = list(monitor = z.monitor), mpdfun = match.arg(mpdfun),
         file = fnames, expand = 0)
 }
 
