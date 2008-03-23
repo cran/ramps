@@ -99,11 +99,12 @@ mpdbetaz <- function(theta, y, xk1mat, k2mat, wmat, spcor, etype, ztype, retype,
    p <- length(control$beta)
 
    if (ncol(wmat) == 0) {
-      uiSIGMA.11 <- as(as(Diagonal(x = sqrt(weights / kappa.e[etype])),
-                          "sparseMatrix"), "dtCMatrix")
+      uiSIGMA.11 <- Matrix(0, length(etype), length(etype))
+      diag(uiSIGMA.11) <- sqrt(weights / kappa.e[etype])
    } else {
-      SIGMA.11 <- Diagonal(x = kappa.e[etype] / weights) + tcrossprod(wmat %*%
-                     as(Diagonal(x = sqrt(kappa.re)[retype]), "sparseMatrix"))
+      SIGMA.11 <- tcrossprod(wmat %*% 
+                      as(Diagonal(x = sqrt(kappa.re)[retype]), "sparseMatrix"))
+      diag(SIGMA.11) <- diag(SIGMA.11) + kappa.e[etype] / weights
       uiSIGMA.11 <- solve(chol(SIGMA.11))
    }
 

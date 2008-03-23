@@ -62,7 +62,9 @@
 }
 
 \references{
-   Yan, J., Cowles, M.K., Wang, S., and Armstrong, M. (2007) \dQuote{Parallelizing MCMC for Bayesian Spatiotemporal Geostatistical Models}, \emph{Statistics and Computing}, in press.
+   Yan, J., Cowles, M.K., Wang, S., and Armstrong, M. (2007) \dQuote{Parallelizing MCMC for Bayesian Spatiotemporal Geostatistical Models}, \emph{Statistics and Computing}, 17(4), 323-335.
+
+   Smith, B. J., Yan, J., and Cowles, M. K. (2008) \dQuote{Unified Geostatistical Modeling for Data Fusion and Spatial Heteroskedasticity with R Package ramps}, \emph{Journal of Statistical Software}, in press.
 }
 
 \author{
@@ -144,6 +146,37 @@ NURE.fit <- georamps(log(ppm) ~ factor(measurement) - 1,
 )
 print(NURE.fit)
 summary(NURE.fit)
+
+
+## Discard initial 5 MCMC samples as a burn-in sequence
+fit <- window(NURE.fit, iter = 6:25)
+print(fit)
+summary(fit)
+
+## Deviance Information Criterion
+DIC(fit)
+
+## Prediction at unmeasured sites
+ct <- map("state", "connecticut", plot = FALSE)
+lon <- seq(min(ct$x, na.rm = TRUE), max(ct$x, na.rm = TRUE), length = 20)
+lat <- seq(min(ct$y, na.rm = TRUE), max(ct$y, na.rm = TRUE), length = 15)
+grid <- expand.grid(lon, lat)
+
+newsites <- data.frame(lon = grid[,1], lat = grid[,2],
+                       measurement = 1)
+pred <- predict(fit, newsites)
+
+plot(pred, func = function(x) exp(mean(x)),
+     database = "state", regions = "connecticut",
+     resolution = c(200, 150), bw = 0.1,
+     main = "Posterior Mean",
+     legend.args = list(text = "ppm", side = 3, line = 1))
+
+plot(pred, func = function(x) exp(sd(x)),
+     database = "state", regions = "connecticut",
+     resolution = c(200, 150), bw = 0.1,
+     main = "Posterior Standard Deviation",
+     legend.args = list(text = "ppm", side = 3, line = 1))
 }
 
 \keyword{models}

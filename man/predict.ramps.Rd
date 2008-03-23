@@ -45,9 +45,8 @@ lon <- seq(min(ct$x, na.rm = TRUE), max(ct$x, na.rm = TRUE), length = 20)
 lat <- seq(min(ct$y, na.rm = TRUE), max(ct$y, na.rm = TRUE), length = 15)
 grid <- expand.grid(lon, lat)
 
-newsites <- data.frame(lon = grid[,1], lat = grid[,2])
-newsites$measurement <- 1
-
+newsites <- data.frame(lon = grid[,1], lat = grid[,2],
+                       measurement = 1)
 NURE.pred <- predict(NURE.fit, newsites)
 
 par(mfrow=c(2,1))

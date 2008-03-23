@@ -5,7 +5,7 @@
 \title{Subsetting of MCMC Sampler Results}
 
 \description{
-   Post-processing function to subset the MCMC iterations in \code{georamps} or \code{predict.ramps} results.}
+   Post-processing function to subset the MCMC iterations in \code{georamps} or \code{predict.ramps} results.
 }
 
 \usage{
@@ -37,7 +37,9 @@
 ## Exclude first five iterations of the georamps example results
 
 \dontrun{
-window(NURE.fit, iter = 5:25)
+fit <- window(NURE.fit, iter = 6:25)
+print(fit)
+summary(fit)
 }
 }
 

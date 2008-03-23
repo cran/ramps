@@ -30,7 +30,7 @@
       \item{\code{lat}}{latitude coordinates of grid sites.}
       \item{\code{id}}{county identifiers.}
    }
-   The areal measurements in \code{NURE} can be matched to the grid coordinates in \code{NURE.grid} via the shared \code{"id"} variable.
+   Areal measurements in \code{NURE} can be matched to the grid coordinates in \code{NURE.grid} via the shared \code{"id"} variable.
 }
 
 \references{

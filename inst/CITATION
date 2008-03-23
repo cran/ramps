@@ -2,19 +2,18 @@ citHeader("To cite ramps in publications use:")
 
 
 citEntry(entry="Article",
-         title = "Parallelizing MCMC for Bayesian Spatiotemporal Geostatistical Models",
-         author = personList(as.person("Jun Yan"),
-                             as.person("Mary Kathryn Cowles"),
-                             as.person("Shaowen Wang"),
-                             as.person("Marc P. Armstrong")),
-         year         = "2007",
-         journal      = "Statistics and Computing",
-         volume       = "17",
+         title = "Unified Geostatistical Modeling for Data Fusion and Spatial Heteroskedasticity with R Package ramps",
+         author = personList(as.person("Brian J. Smith"),
+                             as.person("Jun Yan"),
+                             as.person("Mary Kathryn Cowles")),
+         year         = "2008",
+         journal      = "Journal of Statistical Software",
+         volume       = "in press",
          pages        = "",
          textVersion = 
-         paste("Yan, J., Cowles, M. K., Wang, S., and Armstrong, M. P. (2007)",
-               "Parallelizing MCMC for Bayesian Spatiotemporal Geostatistical Models",
-               "Statistics and Computing, 17(4), pp.")
+         paste("Smith, B. J., Yan, J., and Cowles, M. K. (2008)",
+               "Unified Geostatistical Modeling for Data Fusion and Spatial Heteroskedasticity with R Package ramps,",
+               "Journal of Statistical Software, in press")
 )
 
 

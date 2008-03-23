@@ -43,35 +43,37 @@ mpdpred <- function(params, Y, X, k22mat, wmat, spcor, etype, ztype, retype,
    kappa.z <- kappa2kappa.z(kappa, control)
    kappa.re <- kappa2kappa.re(kappa, control)
 
-   SIGMA.e <- as(as(Diagonal(x = kappa.e[etype] / weights), "sparseMatrix"),
-                 "dtCMatrix")
+   SIGMA.e <- kappa.e[etype] / weights
 
    ## BEGIN: uiSIGMA.11
    if (ny1 == 0) {
       uiSIGMA.11 <- Matrix(0, 0, 0)
    } else {
       y1Idx <- 1:ny1
-      SIGMA.11 <- SIGMA.e[y1Idx, y1Idx]
-      if (ncol(wmat) > 0) {
-        SIGMA.11 <- SIGMA.11 + tcrossprod(wmat[y1Idx, , drop = FALSE] %*%
+      if (ncol(wmat) == 0) {
+         uiSIGMA.11 <- Matrix(0, ny1, ny1)
+         diag(uiSIGMA.11) <- sqrt(1 / SIGMA.e[y1Idx])
+      } else {
+         SIGMA.11 <- tcrossprod(wmat[y1Idx, , drop = FALSE] %*%
                        as(Diagonal(x = sqrt(kappa.re)[retype]), "sparseMatrix"))
+         diag(SIGMA.11) <- diag(SIGMA.11) + SIGMA.e[y1Idx]
+         uiSIGMA.11 <- solve(chol(SIGMA.11))
       }
-      uiSIGMA.11 <- solve(chol(SIGMA.11))
    }
    ## END: uiSIGMA.11
 
    ## BEGIN: uiSIGMA.22
    coef(spcor) <- phi
    vroot <- sqrt(kappa.z)[ztype]
-   SigmaZ <- as(vroot * t(corMatrix(spcor) * vroot), "dgCMatrix")
+   SigmaZ <- Matrix(vroot * t(corMatrix(spcor) * vroot), sparse = TRUE)
 
    y2Idx <- ZuIdx <- ZpIdx <- numeric(0)
    S11 <- S22 <- Matrix(0, 0, 0)
    if (ny2 > 0) {
       y2Idx <- (ny1 + 1):n
       ZuIdx <- (nzp + 1):nz
-      S11 <- k22mat %*% tcrossprod(SigmaZ[ZuIdx, ZuIdx], k22mat) +
-                SIGMA.e[y2Idx, y2Idx]
+      S11 <- k22mat %*% tcrossprod(SigmaZ[ZuIdx, ZuIdx], k22mat)
+      diag(S11) <- diag(S11) + SIGMA.e[y2Idx]
       if (ncol(wmat) > 0) {
          S11 <- S11 + tcrossprod(wmat[y2Idx, , drop = FALSE] %*%
                        as(Diagonal(x = sqrt(kappa.re)[retype]), "sparseMatrix"))
@@ -83,7 +85,9 @@ mpdpred <- function(params, Y, X, k22mat, wmat, spcor, etype, ztype, retype,
    }
    S12 <- if (ny2 > 0 && nzp > 0) k22mat %*% SigmaZ[ZuIdx, ZpIdx]
           else Matrix(0, ny2, nzp)
-   uiSIGMA.22 <- solve(chol(rBind(cBind(S11, S12), cBind(t(S12), S22))))
+
+   S <- as(rBind(cBind(S11, S12), cBind(t(S12), S22)), "symmetricMatrix")
+   uiSIGMA.22 <- solve(chol(S))
    ## END: uiSIGMA.22
 
    logsqrtdet <- -1 * sum(log(c(diag(uiSIGMA.11), diag(uiSIGMA.22))))
@@ -102,27 +106,4 @@ mpdpred <- function(params, Y, X, k22mat, wmat, spcor, etype, ztype, retype,
    XtSiginvY <- crossprod(linvX, linvY)
 
    list(betahat = solve(XtSiginvX, XtSiginvY), uXtSiginvX = chol(XtSiginvX))
-
-   #############################################################################
-   ## Legacy code used previously for calling mpdpred in the slice sampler.
-   ## mpdensity is now used exclusively for slice sampling, so this block is no
-   ## longer needed. 
-   #############################################################################
-   ## betahat <- solve(XtSiginvX, XtSiginvY)
-   ## uXtSiginvX <- chol(XtSiginvX)
-   ##
-   ## logsqrtdetXtSiginvX <- sum(log(diag(uXtSiginvX)))
-   ## resids <- linvY - linvX %*% betahat  
-   ## quadform <- as.numeric(crossprod(resids))
-   ##
-   ## shape <- sigma2shape(control)
-   ## loglik <- -logsqrtdet - logsqrtdetXtSiginvX -
-   ##              (sum(shape) + (length(Y) - p) / 2) *
-   ##              log(quadform / 2 + sum(sigma2scale(control) / kappa)) -
-   ##              sum((shape + 1) * log(kappa))
-   ##
-   ## list(value = loglik, betahat = betahat, quadform = quadform,
-   ##      uXtSiginvX = uXtSiginvX)
-   #############################################################################
-
 }
