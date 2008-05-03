@@ -32,7 +32,7 @@ ramps.engine <- function(y, xmat, kmat, wmat, spcor, etype, ztype, retype,
    params <- matrix(NA, length(iter), length(val), dimnames = list(iter, val))
 
    z <- matrix(NA, length(iter), nzp, dimnames = list(iter, NULL))
-   if (nzp > 0) colnames(z) <- paste("z_", 1:nzp, sep="") 
+   if (nzp > 0) colnames(z) <- paste("z", 1:nzp, sep="") 
 
    loglik <- structure(rep(NA, length(iter)), names = iter)
    evals <- structure(rep(NA, length(iter)), names = iter)

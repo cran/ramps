@@ -14,7 +14,7 @@
 }
 
 \arguments{
-   \item{value}{optional numeric vector of two parameter values for the powered exponential correlation structure, corresponding to the \dQuote{range} and \dQuote{shape}.  All parameter values must be greater than zero.  Defaults to \code{numeric(0)}, which results in a range of 90\% of the minimum distance and a shape of 1 being assigned to the parameter when \code{object} is initialized.}
+   \item{value}{optional numeric vector of two parameter values for the powered exponential correlation structure, corresponding to the \dQuote{range} and \dQuote{shape}.  The range parameter value must be greater than zero, and the shape in the interval (0, 2].  Defaults to \code{numeric(0)}, which results in a range of 90\% of the minimum distance and a shape of 1 being assigned to the parameter when \code{object} is initialized.}
 
    \item{form}{one-sided formula of the form \code{~ S1+...+Sp}, specifying spatial covariates \code{S1} through \code{Sp}. Defaults to \code{~ 1}, which corresponds to using the order of the observations in the data as a covariate.}
 

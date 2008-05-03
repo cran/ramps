@@ -14,7 +14,7 @@
 }
 
 \arguments{
-   \item{value}{optional numeric vector of three parameter values for the exponential correlation structure, corresponding to the \dQuote{spatial range}, \dQuote{temporal range}, and \dQuote{space-time interaction}.  The range parameter values must be greater than zero and the interaction greater than or equal to zero.  Defaults to \code{numeric(0)}, which results in ranges of 90\% of the minimum distances and an interaction of 0 being assigned to the parameters when \code{object} is initialized.}
+   \item{value}{optional numeric vector of three parameter values for the exponential correlation structure, corresponding to the \dQuote{spatial range}, \dQuote{temporal range}, and \dQuote{space-time interaction}.  The range parameter values must be greater than zero, and the interaction greater than or equal to zero.  Defaults to \code{numeric(0)}, which results in ranges of 90\% of the minimum distances and an interaction of 0 being assigned to the parameters when \code{object} is initialized.}
 
    \item{form}{one-sided formula of the form \code{~ S1+...+Sp+T}, specifying spatial covariates \code{S1} through \code{Sp} and the times \code{T} at which measurement were taken.}
 

@@ -59,7 +59,7 @@ predict.ramps <- function(object, newdata, ...)
    p <- ncol(object$xmat)
 
    y <- structure(matrix(0, nrow(object$params), n2),
-           dimnames = list(object$control$iter, paste("yp_", 1:n2, sep="")),
+           dimnames = list(object$control$iter, paste("fit", 1:n2, sep="")),
            coords = sites$coords,
            class = c("predict.ramps", "matrix"))
 

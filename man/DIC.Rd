@@ -17,9 +17,6 @@
    \item{\dots}{some methods for this generic require additional arguments.  None are used in this method.}
 }
 
-\details{
-}
-
 \value{
    An numeric vector with the following two elements:
    \item{DIC}{value of the Deviance Information Criterion.}

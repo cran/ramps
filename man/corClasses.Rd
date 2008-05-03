@@ -8,13 +8,13 @@
 
    Spatial Structures:
    \describe{
+      \item{\code{\link{corRCauchy}}}{Cauchy correlation.}
       \item{\code{\link{corRExp}}}{exponential correlation.}
       \item{\code{\link{corRExpwr}}}{powered exponential correlation.}
       \item{\code{\link{corRGaus}}}{Gaussian correlation.}
       \item{\code{\link{corRGneit}}}{Gneiting approximation to Gaussian correlation.}
       \item{\code{\link{corRLin}}}{linear correlation.}
       \item{\code{\link{corRMatern}}}{Matern correlation.}
-      \item{\code{\link{corRRatio}}}{rational quadratic correlation.}
       \item{\code{\link{corRSpher}}}{spherical correlation.}
       \item{\code{\link{corRWave}}}{sine wave correlation.}
    }
@@ -40,6 +40,7 @@
 }
 
 \seealso{
+   \code{\link{corRCauchy}},
    \code{\link{corRExp}},
    \code{\link{corRExp2}},
    \code{\link{corRExpwr}},
@@ -49,7 +50,6 @@
    \code{\link{corRGneit}},
    \code{\link{corRLin}},
    \code{\link{corRMatern}},
-   \code{\link{corRRatio}},
    \code{\link{corRSpher}}
    \code{\link{corRWave}}
 }

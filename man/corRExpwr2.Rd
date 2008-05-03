@@ -14,7 +14,7 @@
 }
 
 \arguments{
-   \item{value}{optional numeric vector of five parameter values for the powered exponential correlation structure, corresponding to the \dQuote{spatial range}, \dQuote{spatial shape}, \dQuote{temporal range}, \dQuote{temporal shape}, and \dQuote{space-time interaction}.  The range and shape parameter values must be greater than zero and the interaction greater than or equal to zero.  Defaults to \code{numeric(0)}, which results in ranges of 90\% of the minimum distances, shapes of 1, and an interaction of 0 being assigned to the parameters when \code{object} is initialized.}
+   \item{value}{optional numeric vector of five parameter values for the powered exponential correlation structure, corresponding to the \dQuote{spatial range}, \dQuote{spatial shape}, \dQuote{temporal range}, \dQuote{temporal shape}, and \dQuote{space-time interaction}.  The range parameter values must be greater than zero, the shapes in the interval (0, 2], and the interaction greater than or equal to zero.  Defaults to \code{numeric(0)}, which results in ranges of 90\% of the minimum distances, shapes of 1, and an interaction of 0 being assigned to the parameters when \code{object} is initialized.}
 
    \item{form}{one-sided formula of the form \code{~ S1+...+Sp+T}, specifying spatial covariates \code{S1} through \code{Sp} and the times \code{T} at which measurement were taken.}
 
@@ -33,6 +33,8 @@
 
 \references{
    Cressie, N. and Huang, H.-C. (1993) \dQuote{Classes of Nonseperable, Spatio-Temporal Stationary Covariance Functions}, \emph{Journal of the American Statistical Association}, 94, 1330-1340.
+
+   Gneiting, T. (2002) \dQuote{Nonseparable, stationary covariance functions for space-time data}, \emph{Journal of the American Statistical Association}, 97, 590-600.
 }
 
 \author{

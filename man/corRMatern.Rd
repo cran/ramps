@@ -4,7 +4,7 @@
 \title{Matern Spatial Correlation Structure}
 
 \description{
-   This function is a constructor for the \code{'corRMatern'} class, representing a Matern spatial correlation structure. Letting \eqn{r} denote the range, and \eqn{s} the shape, the correlation between two observations a distance \eqn{d} apart is \eqn{1/(2^{s-1} \Gamma(s)) (d/r)^s K_s(d/r)}{1/(2^(s-1)*gamma(s))*(d/r)^s*besselK(d/r, s)}.
+   This function is a constructor for the \code{'corRMatern'} class, representing a Matern spatial correlation structure. Letting \eqn{r} denote the range, and \eqn{s} the scale, the correlation between two observations a distance \eqn{d} apart is \eqn{1/(2^{s-1} \Gamma(s)) (d/r)^s K_s(d/r)}{1/(2^(s-1)*gamma(s))*(d/r)^s*besselK(d/r, s)}.
 }
 
 \usage{
@@ -14,7 +14,7 @@
 }
 
 \arguments{
-   \item{value}{optional numeric vector of two parameter values for the Matern correlation structure, corresponding to the \dQuote{range} and \dQuote{scale}.  All parameter values must be greater than zero.  Defaults to \code{numeric(0)}, which results in a range of 90\% of the minimum distance and a scale of 0.5 being assigned to the parameter when \code{object} is initialized.}
+   \item{value}{optional numeric vector of two parameter values for the Matern correlation structure, corresponding to the \dQuote{range} and \dQuote{scale}.  The range parameter value must be greater than zero, and the scale in the interval (0, 2].  Defaults to \code{numeric(0)}, which results in a range of 90\% of the minimum distance and a scale of 0.5 being assigned to the parameter when \code{object} is initialized.}
 
    \item{form}{one-sided formula of the form \code{~ S1+...+Sp}, specifying spatial covariates \code{S1} through \code{Sp}. Defaults to \code{~ 1}, which corresponds to using the order of the observations in the data as a covariate.}
 

@@ -61,10 +61,8 @@ Initialize.corSpatial <- function(object, data, ...)
    val <- as.vector(object)
    if (length(val) == 0) {
       val <- attr(getCovariate(object), "minD") * 0.9
-   } else if (length(val) == 1) {
-      if (val[1] <= 0) stop("Range must be > 0 in \"corSpatial\" initial value")
-   } else {
-      stop("Initial values for \"corSpatial\" parameters of wrong dimension")
+   } else if (!all(inbounds(val, attr(object, "bounds")))) {
+      stop()
    }
    attributes(val) <- attributes(object)
 
@@ -81,7 +79,7 @@ Dim.corSpatial <- function(object, groups, ...)
    ## will use third component of Dim list for spClass
    names(val)[3] <- "spClass"
    val[[3]] <- match(class(object)[1], c("corRExp", "corRExpwr", "corRGaus",
-                     "corRGneit", "corRLin", "corRMatern", "corRRatio",
+                     "corRGneit", "corRLin", "corRMatern", "corRCauchy",
                      "corRSpher"), 0)
 
    val
@@ -152,7 +150,7 @@ corMatrix.corSpatial <- function(object, covariate = getCovariate(object),
       corRGneit  = cor.gneiting(dist, par[1]),
       corRLin    = cor.lin(dist, par[1]),
       corRMatern = cor.matern(dist, par[1], par[2]),
-      corRRatio  = cor.ratio(dist, par[1]),
+      corRCauchy = cor.cauchy(dist, par[1]),
       corRSpher  = cor.spher(dist, par[1]),
       corRWave   = cor.wave(dist, par[1])
    )
@@ -198,7 +196,7 @@ coef.corSpatial <- function(object, ...)
    if (length(val) == 0) {
       return(val)
    }
-   names(val) <- "range"
+   names(val) <- rownames(attr(object, "bounds"))
 
    val
 }
@@ -206,11 +204,7 @@ coef.corSpatial <- function(object, ...)
 
 "coef<-.corSpatial" <- function(object, ..., value)
 {
-   if (length(value) != length(object)) {
-      stop("Cannot change the length of the parameter after initialization")
-   } else if (any(value <= 0)) {
-      stop("Parameter values must be > 0")
-   }
+   if (!all(inbounds(value, attr(object, "bounds")))) stop()
    object[] <- value
 
    object
@@ -227,6 +221,8 @@ corRExp <- function(value = numeric(0), form = ~ 1,
    attr(value, "formula") <- form
    attr(value, "metric") <- match.arg(metric)
    attr(value, "radius") <- radius
+   attr(value, "bounds") <- matrix(c(0, Inf, 1), ncol=3,
+      dimnames = list("range", c("lower", "upper", "type")))
    class(value) <- c("corRExp", "corSpatial", "corStruct")
 
    value
@@ -243,6 +239,8 @@ corRExpwr <- function(value = numeric(0), form = ~ 1,
    attr(value, "formula") <- form
    attr(value, "metric") <- match.arg(metric)
    attr(value, "radius") <- radius
+   attr(value, "bounds") <- matrix(c(0, 0, Inf, 2, 1, 3), ncol=3,
+      dimnames = list(c("range", "shape"), c("lower", "upper", "type")))
    class(value) <- c("corRExpwr", "corSpatial", "corStruct")
 
    value
@@ -259,26 +257,10 @@ Initialize.corRExpwr <- function(object, data, ...)
    val <- as.vector(object)
    if (length(val) == 0) {
       val <- c(attr(getCovariate(object), "minD") * 0.9, 1)
-   } else if (length(val) == 2) {
-      if (any(val[1:2] <= 0)) {
-         stop("Initial values for \"corSpatial\" parameters must be > 0")
-      }
-   } else {
-      stop("Initial values for \"corSpatial\" parameters of wrong dimension")
+   } else if (!all(inbounds(val, attr(object, "bounds")))) {
+      stop()
    }
    attributes(val) <- attributes(object)
-
-   val
-}
-
-
-coef.corRExpwr <- function(object, ...)
-{
-   val <- as.vector(object)
-   if (length(val) == 0) {
-      return(val)
-   }
-   names(val) <- c("range", "shape")
 
    val
 }
@@ -294,6 +276,8 @@ corRGaus <- function(value = numeric(0), form = ~ 1,
    attr(value, "formula") <- form
    attr(value, "metric") <- match.arg(metric)
    attr(value, "radius") <- radius
+   attr(value, "bounds") <- matrix(c(0, Inf, 1), ncol=3,
+      dimnames = list("range", c("lower", "upper", "type")))
    class(value) <- c("corRGaus", "corSpatial", "corStruct")
    value
 }
@@ -309,6 +293,8 @@ corRGneit <- function(value = numeric(0), form = ~ 1,
    attr(value, "formula") <- form
    attr(value, "metric") <- match.arg(metric)
    attr(value, "radius") <- radius
+   attr(value, "bounds") <- matrix(c(0, Inf, 1), ncol=3,
+      dimnames = list("range", c("lower", "upper", "type")))
    class(value) <- c("corRGneit", "corSpatial", "corStruct")
    value
 }
@@ -324,6 +310,8 @@ corRLin <- function(value = numeric(0), form = ~ 1,
    attr(value, "formula") <- form
    attr(value, "metric") <- match.arg(metric)
    attr(value, "radius") <- radius
+   attr(value, "bounds") <- matrix(c(0, Inf, 1), ncol=3,
+      dimnames = list("range", c("lower", "upper", "type")))
    class(value) <- c("corRLin", "corSpatial", "corStruct")
    value
 }
@@ -339,6 +327,8 @@ corRMatern <- function(value = numeric(0), form = ~ 1,
    attr(value, "formula") <- form
    attr(value, "metric") <- match.arg(metric)
    attr(value, "radius") <- radius
+   attr(value, "bounds") <- matrix(c(0, 0, Inf, 2, 1, 3), ncol=3,
+      dimnames = list(c("range", "scale"), c("lower", "upper", "type")))
    class(value) <- c("corRMatern", "corSpatial", "corStruct")
    value
 }
@@ -354,12 +344,8 @@ Initialize.corRMatern <- function(object, data, ...)
    val <- as.vector(object)
    if (length(val) == 0) {
       val <- c(attr(getCovariate(object), "minD") * 0.9, 0.5)
-   } else if (length(val) == 2) {
-      if (any(val[1:2] <= 0)) {
-         stop("Initial values for \"corSpatial\" parameters must be > 0")
-      }
-   } else {
-      stop("Initial values for \"corSpatial\" parameters of wrong dimension")
+   } else if (!all(inbounds(val, attr(object, "bounds")))) {
+      stop()
    }
    attributes(val) <- attributes(object)
 
@@ -367,29 +353,19 @@ Initialize.corRMatern <- function(object, data, ...)
 }
 
 
-coef.corRMatern <- function(object, ...)
-{
-   val <- as.vector(object)
-   if (length(val) == 0) {
-      return(val)
-   }
-   names(val) <- c("range", "shape")
-
-   val
-}
-
-
 ################################################################################
-# corRRatio - rational quadratic spatial correlation structure
+# corRCauchy - Cauchy spatial correlation structure
 ################################################################################
 
-corRRatio <- function(value = numeric(0), form = ~ 1,
+corRCauchy <- function(value = numeric(0), form = ~ 1,
    metric = c("euclidean", "maximum", "manhattan", "haversine"), radius = 3956)
 {
    attr(value, "formula") <- form
    attr(value, "metric") <- match.arg(metric)
    attr(value, "radius") <- radius
-   class(value) <- c("corRRatio", "corSpatial", "corStruct")
+   attr(value, "bounds") <- matrix(c(0, Inf, 1), ncol=3,
+      dimnames = list("range", c("lower", "upper", "type")))
+   class(value) <- c("corRCauchy", "corSpatial", "corStruct")
    value
 }
 
@@ -404,6 +380,8 @@ corRSpher <- function(value = numeric(0), form = ~ 1,
    attr(value, "formula") <- form
    attr(value, "metric") <- match.arg(metric)
    attr(value, "radius") <- radius
+   attr(value, "bounds") <- matrix(c(0, Inf, 1), ncol=3,
+      dimnames = list("range", c("lower", "upper", "type")))
    class(value) <- c("corRSpher", "corSpatial", "corStruct")
    value
 }
@@ -419,6 +397,8 @@ corRWave <- function(value = numeric(0), form = ~ 1,
    attr(value, "formula") <- form
    attr(value, "metric") <- match.arg(metric)
    attr(value, "radius") <- radius
+   attr(value, "bounds") <- matrix(c(0, Inf, 1), ncol=3,
+      dimnames = list("range", c("lower", "upper", "type")))
    class(value) <- c("corRWave", "corSpatial", "corStruct")
    value
 }
@@ -439,12 +419,8 @@ Initialize.corSpatioTemporal <- function(object, data, ...)
    if (length(val) == 0) {
       val <- attr(getCovariate(object), "minD") * 0.9
       val[val == 0] <- 1
-   } else if (length(val) == 2) {
-      if (any(val[1:2] <= 0)) {
-         stop("Initial values for \"corSpatioTemporal\" parameters must be > 0")
-      }
-   } else {
-      stop("Initial values for \"corSpatioTemporal\" parameters of wrong dimension")
+   } else if (!all(inbounds(val, attr(object, "bounds")))) {
+      stop()
    }
    attributes(val) <- attributes(object)
 
@@ -592,7 +568,7 @@ coef.corSpatioTemporal <- function(object, ...)
    if (length(val) == 0) {
       return(val)
    }
-   names(val) <- c("spatial range", "temporal range")
+   names(val) <- rownames(attr(object, "bounds"))
 
    val
 }
@@ -600,11 +576,7 @@ coef.corSpatioTemporal <- function(object, ...)
 
 "coef<-.corSpatioTemporal" <- function(object, ..., value)
 {
-   if (length(value) != length(object)) {
-      stop("Cannot change the length of the parameter after initialization")
-   } else if (any(value <= 0)) {
-      stop("Parameter values must be > 0")
-   }
+   if (!all(inbounds(value, attr(object, "bounds")))) stop()
    object[] <- value
 
    object
@@ -618,12 +590,15 @@ coef.corSpatioTemporal <- function(object, ...)
 corRExp2 <- function(value = numeric(0), form = ~ 1,
    metric = c("euclidean", "maximum", "manhattan", "haversine"), radius = 3956)
 {
-  attr(value, "formula") <- form
-  attr(value, "metric") <- match.arg(metric)
-  attr(value, "radius") <- radius
-  class(value) <- c("corRExp2", "corSpatioTemporal", "corStruct")
+   attr(value, "formula") <- form
+   attr(value, "metric") <- match.arg(metric)
+   attr(value, "radius") <- radius
+   attr(value, "bounds") <- matrix(c(0, 0, 0, Inf, Inf, Inf, 1, 1, 2), ncol=3,
+      dimnames = list(c("spatial range", "temporal range", "interaction"),
+                      c("lower", "upper", "type")))
+   class(value) <- c("corRExp2", "corSpatioTemporal", "corStruct")
 
-  value
+   value
 }
 
 
@@ -639,41 +614,12 @@ Initialize.corRExp2 <- function(object, data, ...)
       val <- attr(getCovariate(object), "minD") * 0.9
       val[val == 0] <- 1
       val <- c(val, 0)
-   } else if (length(val) == 3) {
-      if (any(val[1:2] <= 0, val[3] < 0)) {
-         stop("Initial values for \"corSpatioTemporal\" parameters must be > 0")
-      }
-   } else {
-      stop("Initial values for \"corSpatioTemporal\" parameters of wrong dimension")
+   } else if (!all(inbounds(val, attr(object, "bounds")))) {
+      stop()
    }
    attributes(val) <- attributes(object)
 
    val
-}
-
-
-coef.corRExp2 <- function(object, ...)
-{
-   val <- as.vector(object)
-   if (length(val) == 0) {
-      return(val)
-   }
-   names(val) <- c("spatial range", "temporal range", "interaction")
-
-   val
-}
-
-
-"coef<-.corRExp2" <- function(object, ..., value)
-{
-   if (length(value) != 3) {
-      stop("Cannot change the length of the parameter after initialization")
-   } else if (any(value[1:2] <= 0, value[3] < 0)) {
-      stop("Parameter values are out of range")
-   }
-   object[] <- value
-
-   object
 }
 
 
@@ -684,12 +630,17 @@ coef.corRExp2 <- function(object, ...)
 corRExpwr2 <- function(value = numeric(0), form = ~ 1,
    metric = c("euclidean", "maximum", "manhattan", "haversine"), radius = 3956)
 {
-  attr(value, "formula") <- form
-  attr(value, "metric") <- match.arg(metric)
-  attr(value, "radius") <- radius
-  class(value) <- c("corRExpwr2", "corSpatioTemporal", "corStruct")
+   attr(value, "formula") <- form
+   attr(value, "metric") <- match.arg(metric)
+   attr(value, "radius") <- radius
+   attr(value, "bounds") <- matrix(c(0, 0, 0, 0, 0, Inf, 2, Inf, 2, Inf,
+                                     1, 3, 1, 3, 2), ncol=3,
+      dimnames = list(c("spatial range", "spatial shape", "temporal range",
+                        "temporal shape", "interaction"),
+                      c("lower", "upper", "type")))
+   class(value) <- c("corRExpwr2", "corSpatioTemporal", "corStruct")
 
-  value
+   value
 }
 
 
@@ -705,42 +656,12 @@ Initialize.corRExpwr2 <- function(object, data, ...)
       val <- attr(getCovariate(object), "minD") * 0.9
       val[val == 0] <- 1
       val <- c(val[1], 1, val[2], 1, 0)
-   } else if (length(val) == 5) {
-      if (any(val[1:4] <= 0, val[5] < 0)) {
-         stop("Initial values for \"corSpatioTemporal\" parameters must be > 0")
-      }
-   } else {
-      stop("Initial values for \"corSpatioTemporal\" parameters of wrong dimension")
+   } else if (!all(inbounds(val, attr(object, "bounds")))) {
+      stop()
    }
    attributes(val) <- attributes(object)
 
    val
-}
-
-
-coef.corRExpwr2 <- function(object, ...)
-{
-   val <- as.vector(object)
-   if (length(val) == 0) {
-      return(val)
-   }
-   names(val) <- c("spatial range", "spatial shape", "temporal range",
-                   "temporal shape", "interaction")
-
-   val
-}
-
-
-"coef<-.corRExpwr2" <- function(object, ..., value)
-{
-   if (length(value) != 5) {
-      stop("Cannot change the length of the parameter after initialization")
-   } else if (any(value[1:4] <= 0, value[5] < 0)) {
-      stop("Parameter values are out of range")
-   }
-   object[] <- value
-
-   object
 }
 
 
@@ -752,12 +673,16 @@ coef.corRExpwr2 <- function(object, ...)
 corRExpwr2Dt <- function(value = numeric(0), form = ~ 1,
    metric = c("euclidean", "maximum", "manhattan", "haversine"), radius = 3956)
 {
-  attr(value, "formula") <- form
-  attr(value, "metric") <- match.arg(metric)
-  attr(value, "radius") <- radius
-  class(value) <- c("corRExpwr2Dt", "corSpatioTemporal", "corStruct")
+   attr(value, "formula") <- form
+   attr(value, "metric") <- match.arg(metric)
+   attr(value, "radius") <- radius
+   attr(value, "bounds") <- matrix(c(0, 0, 0, 0, Inf, 2, Inf, Inf,
+                                     1, 3, 1, 2), ncol=3,
+      dimnames = list(c("spatial range", "spatial shape", "temporal range",
+                        "interaction"), c("lower", "upper", "type")))
+   class(value) <- c("corRExpwr2Dt", "corSpatioTemporal", "corStruct")
 
-  value
+   value
 }
 
 
@@ -773,12 +698,8 @@ Initialize.corRExpwr2Dt <- function(object, data, ...)
       val <- attr(getCovariate(object), "minD") * 0.9
       val[val == 0] <- 1
       val <- c(val[1], 1, val[2], 0)
-   } else if (length(val) == 4) {
-      if (any(val[1:3] <= 0, val[4] < 0)) {
-         stop("Initial values for \"corRExpwr2Dt\" parameters must be > 0")
-      }
-   } else {
-      stop("Initial values for \"corRExpwr2Dt\" parameters of wrong dimension")
+   } else if (!all(inbounds(val, attr(object, "bounds")))) {
+      stop()
    }
    attributes(val) <- attributes(object)
 
@@ -926,32 +847,6 @@ corFactor.corRExpwr2Dt <- function(object, ...)
 }
 
 
-coef.corRExpwr2Dt <- function(object, ...)
-{
-   val <- as.vector(object)
-   if (length(val) == 0) {
-      return(val)
-   }
-   names(val) <- c("spatial range", "spatial shape", "temporal range",
-                   "interaction")
-
-   val
-}
-
-
-"coef<-.corRExpwr2Dt" <- function(object, ..., value)
-{
-   if (length(value) != 4) {
-      stop("Cannot change the length of the parameter after initialization")
-   } else if (any(value[1:3] <= 0, value[4] < 0)) {
-      stop("Parameter values are out of range")
-   }
-   object[] <- value
-
-   object
-}
-
-
 ################################################################################
 # Distance and correlation functions
 ################################################################################
@@ -1085,7 +980,7 @@ cor.gneiting <- function(x, range = 1)
    if (range <= 0)
       stop("Gneiting correlation parameter must be > 0")
 
-   range <- range / 0.301187465825
+   range <- range / 0.3008965026325734   # sqrt(2) * 10 / 47
    r <- (x < range)
    x0 <- x[r] / range
    r[r] <- (1 + 8 * x0 + 25 * x0^2 + 32 * x0^3) * (1 - x0)^8
@@ -1116,13 +1011,13 @@ cor.matern <- function(x, range = 1, scale = 1)
    r
 }
 
-## Rational quadratic correlation function
-cor.ratio <- function(x, range = 1)
+## Cauchy correlation function
+cor.cauchy <- function(x, range = 1)
 {
    if (range <= 0)
-      stop("Rational quadratic correlation parameter must be > 0")
+      stop("Cauchy correlation parameter must be > 0")
 
-   1 / ((x / range)^2 + 1)
+   1 / (1 + (x / range)^2)
 }
 
 ## Sperical correlation function

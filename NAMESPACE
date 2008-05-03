@@ -7,7 +7,7 @@ export(
    corRGneit,
    corRLin,
    corRMatern,
-   corRRatio,
+   corRCauchy,
    corRSpher,
    corRWave,
    corRExp2,
@@ -36,16 +36,8 @@ export(
 ##    ramps.engine
 ## )
 
-S3method(coef, corRExp2)
-S3method(coef, corRExpwr)
-S3method(coef, corRExpwr2)
-S3method(coef, corRExpwr2Dt)
-S3method(coef, corRMatern)
 S3method(coef, corSpatial)
 S3method(coef, corSpatioTemporal)
-S3method("coef<-", corRExp2)
-S3method("coef<-", corRExpwr2)
-S3method("coef<-", corRExpwr2Dt)
 S3method("coef<-", corSpatial)
 S3method("coef<-", corSpatioTemporal)
 S3method(corFactor, corRExpwr2Dt)

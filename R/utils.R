@@ -238,6 +238,31 @@ rmvnorm2 <- function(n, mu, sigma)
 ## Data management function
 ################################################################################
 
+inbounds <- function(x, bounds)
+{
+   if (length(x) != nrow(bounds)) {
+      warning("Number of supplied parameter values must be ", nrow(bounds),
+              " instead of ", length(x))
+      return(rep(FALSE, length(x)))
+   }
+
+   type <- bounds[,3]
+   lower <- ifelse(type %in% c(2,4), x >= bounds[,1], x > bounds[,1])
+   upper <- ifelse(type %in% c(3,4), x <= bounds[,2], x < bounds[,2])
+
+   val <- lower & upper
+   if (!all(val)) {
+      lchar <- c("(", "[", "(", "[")
+      uchar <- c(")", ")", "]", "]")
+      support <- apply(bounds[,c(1,2),drop=FALSE], 1, paste, collapse=", ")
+      warning("Out of bounds parameter value ",
+              paste(x, ifelse(val, " = ", " != "),
+                    lchar[type], support, uchar[type], sep="", collapse=", "))
+   }
+
+   val
+}
+
 unique.sites <- function(x)
 {
    coords <- unique(x)
@@ -256,7 +281,7 @@ unique.sites <- function(x)
 name.ext <- function(name, ext)
 {
    if (is.null(ext)) name <- NULL
-   else if (length(ext) > 1) name <- paste(name, "_", ext, sep="")
+   else if (length(ext) > 1) name <- paste(name, ext, sep="")
 
    name
 }

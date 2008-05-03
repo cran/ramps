@@ -1,14 +1,14 @@
-\name{corRRatio}
-\alias{corRRatio}
+\name{corRCauchy}
+\alias{corRCauchy}
 
-\title{Rational Quadratic Spatial Correlation Structure}
+\title{Cauchy Spatial Correlation Structure}
 
 \description{
-   This function is a constructor for the \code{'corRRatio'} class, representing a rational quadratic spatial correlation structure. Letting \eqn{r} denote the range, the correlation between two observations a distance \eqn{d} apart is \eqn{1/(1+(d/r)^2)}.
+   This function is a constructor for the \code{'corRCauchy'} class, representing a Cauchy (rational quadratic) spatial correlation structure. Letting \eqn{r} denote the range, the correlation between two observations a distance \eqn{d} apart is \eqn{1/(1+(d/r)^2)}.
 }
 
 \usage{
-   corRRatio(value = numeric(0), form = ~ 1,
+   corRCauchy(value = numeric(0), form = ~ 1,
              metric = c("euclidean", "maximum", "manhattan", "haversine"),
              radius = 3956)
 }
@@ -28,7 +28,7 @@
 }
 
 \value{
-   Object of class \code{'corRRatio'}, also inheriting from class \code{'corSpatial'}, representing a rational quadratic spatial correlation structure.
+   Object of class \code{'corRCauchy'}, also inheriting from class \code{'corSpatial'}, representing a rational quadratic spatial correlation structure.
 }
 
 \references{
@@ -48,17 +48,17 @@
 }
 
 \examples{
-sp1 <- corRRatio(form = ~ x + y + z)
+sp1 <- corRCauchy(form = ~ x + y + z)
 
 spatDat <- data.frame(x = (0:4)/4, y = (0:4)/4)
 
-cs1Ratio <- corRRatio(1, form = ~ x + y)
-cs1Ratio <- Initialize(cs1Ratio, spatDat)
-corMatrix(cs1Ratio)
+cs1Cauchy <- corRCauchy(1, form = ~ x + y)
+cs1Cauchy <- Initialize(cs1Cauchy, spatDat)
+corMatrix(cs1Cauchy)
 
-cs2Ratio <- corRRatio(1, form = ~ x + y, metric = "man")
-cs2Ratio <- Initialize(cs2Ratio, spatDat)
-corMatrix(cs2Ratio)
+cs2Cauchy <- corRCauchy(1, form = ~ x + y, metric = "man")
+cs2Cauchy <- Initialize(cs2Cauchy, spatDat)
+corMatrix(cs2Cauchy)
 }
 
 \keyword{models}

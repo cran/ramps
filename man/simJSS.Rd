@@ -40,7 +40,7 @@
 }
 
 \references{
-   Smith, B. J., Yan, J., and Cowles, M. K. (2008) \dQuote{Unified Geostatistical Modeling for Data Fusion and Spatial Heteroskedasticity with R Package ramps}, \emph{Journal of Statistical Software}, in press.
+   Smith, B. J., Yan, J., and Cowles, M. K. (2008) \dQuote{Unified Geostatistical Modeling for Data Fusion and Spatial Heteroskedasticity with R Package ramps}, \emph{Journal of Statistical Software}, 25(10), 1-21.
 }
 
 \examples{
