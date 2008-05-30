@@ -30,9 +30,10 @@ mpdbeta <- function(theta, y, xmat, kmat, wmat, spcor, etype, ztype, retype,
    KMAT <- kmat %*% as(Diagonal(x = sqrt(kappa.z)[ztype]), "sparseMatrix")
    SIGMA <- Diagonal(x = kappa.e[etype] / weights) +
                tcrossprod(KMAT %*% corMatrix(spcor), KMAT)
+
    if(ncol(wmat) > 0) {
       SIGMA <- SIGMA + tcrossprod(wmat %*%
-                  as(Diagonal(x = sqrt(kappa.re)[retype]), "sparseMatrix"))
+                       as(Diagonal(x = sqrt(kappa.re)[retype]), "sparseMatrix"))
    }
    uSIGMA <- chol(as.matrix(SIGMA))
 
@@ -102,8 +103,8 @@ mpdbetaz <- function(theta, y, xk1mat, k2mat, wmat, spcor, etype, ztype, retype,
       uiSIGMA.11 <- Matrix(0, length(etype), length(etype))
       diag(uiSIGMA.11) <- sqrt(weights / kappa.e[etype])
    } else {
-      SIGMA.11 <- tcrossprod(wmat %*% 
-                      as(Diagonal(x = sqrt(kappa.re)[retype]), "sparseMatrix"))
+      SIGMA.11 <- tcrossprod(wmat %*%
+                       as(Diagonal(x = sqrt(kappa.re)[retype]), "sparseMatrix"))
       diag(SIGMA.11) <- diag(SIGMA.11) + kappa.e[etype] / weights
       uiSIGMA.11 <- solve(chol(SIGMA.11))
    }

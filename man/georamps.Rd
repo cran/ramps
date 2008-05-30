@@ -168,13 +168,13 @@ pred <- predict(fit, newsites)
 
 plot(pred, func = function(x) exp(mean(x)),
      database = "state", regions = "connecticut",
-     resolution = c(200, 150), bw = 0.1,
+     resolution = c(200, 150), bw = 5,
      main = "Posterior Mean",
      legend.args = list(text = "ppm", side = 3, line = 1))
 
 plot(pred, func = function(x) exp(sd(x)),
      database = "state", regions = "connecticut",
-     resolution = c(200, 150), bw = 0.1,
+     resolution = c(200, 150), bw = 5,
      main = "Posterior Standard Deviation",
      legend.args = list(text = "ppm", side = 3, line = 1))
 }

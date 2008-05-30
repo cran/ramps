@@ -32,11 +32,11 @@ predict.ramps <- function(object, newdata, ...)
               data = as.data.frame(rbind(object$coords, sites$coords)))
 
    # Extract main effects design matrix and spatial variances indices
-   idx <- as.numeric(rownames(sites$coords))
-   xmat <- as(model.matrix(mt, mfdata[idx,,drop=FALSE],
-                           attr(object$xmat, "contrasts")), "dgCMatrix")
-   ztype <- if (is.null(variance$spatial)) factor(rep(1, length(idx)))
-            else factor(getCovariate(mfdata[idx,,drop=FALSE], variance$spatial),
+   mfdata <- mfdata[monitor,,drop=FALSE]
+   xmat <- Matrix(model.matrix(mt, mfdata, attr(object$xmat, "contrasts")))
+   kmat <- Matrix(model.matrix(~ factor(sites$idx) - 1))
+   ztype <- if (is.null(variance$spatial)) rep(1, nrow(xmat))
+            else factor(getCovariate(mfdata, variance$spatial),
                         levels = levels(object$ztype))
 
    ## Extract sampled correlation and variance parameters 
@@ -58,10 +58,13 @@ predict.ramps <- function(object, newdata, ...)
    n2 <- nrow(sites$coords)
    p <- ncol(object$xmat)
 
-   y <- structure(matrix(0, nrow(object$params), n2),
-           dimnames = list(object$control$iter, paste("fit", 1:n2, sep="")),
-           coords = sites$coords,
-           class = c("predict.ramps", "matrix"))
+   val <- sites$coords[sites$idx,,drop=FALSE]; rownames(val) <- rownames(mfdata)
+   y <- structure(
+      matrix(0, nrow(object$params), nrow(val),
+         dimnames = list(object$control$iter, name.ext("fit", rownames(val)))),
+      coords = val,
+      class = c("predict.ramps", "matrix")
+   )
 
    cat("MCMC Sampler Progress (N = ", max(object$control$iter), "):\n", sep="")
    for(i in 1:nrow(y)) {
@@ -74,7 +77,7 @@ predict.ramps <- function(object, newdata, ...)
                          object$ztype, object$retype, object$weights,
                          object$control)
          BETA <- mpd$betahat + solve(mpd$uXtSiginvX, rnorm(p + nz))
-         beta <- BETA[seq(length.out = p)] 
+         beta <- BETA[seq(length.out = p)]
          z <- BETA[seq(p + 1, length.out = nz)]
       }
 
@@ -82,14 +85,13 @@ predict.ramps <- function(object, newdata, ...)
       R <- corMatrix(correlation)
       KMAT <- k2mat %*% as(Diagonal(x = sigma.z[i, object$ztype]), "sparseMatrix")
       R11 <- as.matrix(tcrossprod(KMAT %*% R[1:n1, 1:n1], KMAT))
+      uiR11 <- as(backsolve(chol(R11), diag(nz)), "dtCMatrix")
       R21 <- R[(n1+1):(n1+n2), 1:n1] %*% t(KMAT)
       R22 <- R[(n1+1):(n1+n2), (n1+1):(n1+n2)]
 
-      uiR11 <- as(backsolve(chol(R11), diag(nrow(R11))), "dtCMatrix")
       val <- R21 %*% uiR11
-      y[i,] <- as.vector(xmat %*% beta) + sqrt(sigma.z[i, ztype]) *
-                  rmvnorm2(1, tcrossprod(val, uiR11) %*% z,
-                              R22 - tcrossprod(val))[1,]
+      zp <- rmvnorm2(1, tcrossprod(val, uiR11) %*% z, R22 - tcrossprod(val))[1,]
+      y[i,] <- as.vector(xmat %*% beta + sqrt(sigma.z[i, ztype]) * kmat %*% zp)
 
       print.iter(object$control$iter[i])
    }

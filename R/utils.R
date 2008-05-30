@@ -196,10 +196,10 @@ sigma2scale <- function(control)
 
 
 ################################################################################
-## Random number generation
+## Statistical functions
 ################################################################################
 
-rdirichlet <- function (n, alpha) {
+rdirichlet <- function(n, alpha) {
    ## taken from MCMCpack
    ## Markov Chain Monte Carlo Package (MCMCpack)
    ## Copyright (C) 2003-2007 Andrew D. Martin and Kevin M. Quinn

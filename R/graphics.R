@@ -43,7 +43,7 @@ plot.default <- function(z, coords, type, col, func, sites, database, regions,
 
    val <- as.image(mu, x = coords, nrow = resolution[2], ncol = resolution[1])
    z <- image.smooth(val$z, dx = val$x[2] - val$x[1], dy = val$y[2] - val$y[1],
-                     theta = bw)
+           theta = bw * sqrt(diff(range(val$x))^2 + diff(range(val$y))^2) / 100)
 
    args <- list(x = val$x, y = val$y, z = z, col = col, ...)
    val <- colnames(coords)

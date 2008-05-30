@@ -26,7 +26,7 @@
    \item{database}{character string naming a geographical database for the mapping of geographic boundaries.  See \code{map} documentation for details.}
    \item{regions}{character vector naming the polygons to draw.  See \code{map} documentation for details.}
    \item{resolution}{numerical vector of length 2 specifying the number of pixels (width x height) for the surface image.}
-   \item{bw}{bandwidth used for smoothing the spatial surface.}
+   \item{bw}{numerical value specifying the bandwidth used for smoothing the spatial surface as a percentage of the diagonal length of the plot region.  Defaults to 1\% of the diagonal length.}
    \item{\dots}{additional arguments passed to the underlying plotting function associated with the specified \code{type} argument.}
 }
 
@@ -49,7 +49,7 @@
 
 \dontrun{
 plot(NURE.fit, database = "state", regions = "connecticut",
-     resolution = c(200, 150), bw = 0.1,
+     resolution = c(200, 150), bw = 5,
      main = "Spatial Process Posterior Mean")
 }
 }
