@@ -45,8 +45,7 @@ expand.chain <- function(object, n)
    ## Set initial values to last sample
    control$beta$init <- params2beta(object$params[nr,], control)
    control$phi$init <- params2phi(object$params[nr,], control)
-   val <- params2kappa(object$params[nr,], control)
-   val <- val / sum(val)
+   val <- prop.table(params2kappa(object$params[nr,], control))
    control$sigma2.e$init <- kappa2kappa.e(val, control)
    control$sigma2.z$init <- kappa2kappa.z(val, control)
    control$sigma2.re$init <- kappa2kappa.re(val, control)
@@ -143,35 +142,41 @@ genUSStateSites <- function(state, nsites) {
 
 params2phi <- function(params, control) {
    idx <- seq(length.out = length(control$phi))
-   params[idx]
+   if (is.matrix(params)) params[,idx,drop=FALSE]
+   else params[idx]
 }
 
 params2kappa <- function(params, control) {
    idx <- seq(length(control$phi) + 1, length.out = length(control$sigma2.e)
               + length(control$sigma2.z) + length(control$sigma2.re))
-   params[idx]
+   if (is.matrix(params)) params[,idx,drop=FALSE]
+   else params[idx]
 }
 
 params2beta <- function(params, control) {
    p <- length(control$beta)
    idx <- seq(length(params) - p + 1, length.out = p)
-   params[idx]
+   if (is.matrix(params)) params[,idx,drop=FALSE]
+   else params[idx]
 }
 
 kappa2kappa.e <- function(kappa, control) {
    idx <- seq(length.out = length(control$sigma2.e))
-   kappa[idx]
+   if (is.matrix(kappa)) kappa[,idx,drop=FALSE]
+   else kappa[idx]
 }
 
 kappa2kappa.z <- function(kappa, control) {
    idx <- seq(length(control$sigma2.e) + 1, length.out = length(control$sigma2.z))
-   kappa[idx]
+   if (is.matrix(kappa)) kappa[,idx,drop=FALSE]
+   else kappa[idx]
 }
 
 kappa2kappa.re <- function(kappa, control) {
    idx <- seq(length(control$sigma2.e) + length(control$sigma2.z) + 1,
               length.out = length(control$sigma2.re))
-   kappa[idx]
+   if (is.matrix(kappa)) kappa[,idx,drop=FALSE]
+   else kappa[idx]
 }
 
 sigma2init <- function(control)
@@ -265,12 +270,18 @@ inbounds <- function(x, bounds)
 
 unique.sites <- function(x)
 {
+   type <- class(x)
+
+   x <- as.matrix(x)
    coords <- unique(x)
 
    n <- ncol(x)
    y <- merge(cbind(x, 1:nrow(x)), cbind(coords, 1:nrow(coords)), by = 1:n)
+   idx <- y[order(y[, n+1]), n+2]
+   map <- Matrix(0, length(idx), nrow(coords))
+   map[seq(idx) + nrow(map) * (idx - 1)] <- 1
 
-   list(coords = coords, idx = y[order(y[, n+1]), n+2])
+   list(coords = as(coords, type), map = map)
 }
 
 

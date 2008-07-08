@@ -16,13 +16,14 @@ georamps <- function(fixed, random, correlation, data = sys.frame(sys.parent()),
    mfdata <- do.call("model.frame", mfargs)
 
    ## Zero-out the coordinates for aggregate measurements
-   val <- mfdata[,aggregate$blockid]
-   if (!is.null(val)) {
-      idx <- c(aggregate$blockid, spvars)
-      if (!all(idx %in% colnames(aggregate$grid)))
+   if (nchar(aggregate$blockid) > 0) {
+      val <- c(aggregate$blockid, spvars)
+      if (!all(val %in% colnames(aggregate$grid)))
          stop("Coordinates and 'blockid' must be given in 'grid'")
-      aggregate$grid <- na.omit(aggregate$grid[,idx])
-      mfdata[is.element(val, aggregate$grid[,aggregate$blockid]), spvars] <- 0
+      aggregate$grid <- na.omit(aggregate$grid[,val])
+      idx <- is.element(mfdata[,aggregate$blockid],
+                        aggregate$grid[,aggregate$blockid])
+      mfdata[idx, spvars] <- 0
    }
 
    ## Remove incomplete records from the data frame
@@ -39,7 +40,7 @@ georamps <- function(fixed, random, correlation, data = sys.frame(sys.parent()),
    mt <- attr(mf, "terms")
    y <- model.response(mf, "numeric")
    val <- model.matrix(mt, mf, contrasts)
-   xmat <- as(val, "dgCMatrix")
+   xmat <- as(val, "sparseMatrix")
    attr(xmat, "contrasts") <- attr(val, "contrasts")
 
    ## Indices to map measurement error variances
@@ -75,7 +76,7 @@ georamps <- function(fixed, random, correlation, data = sys.frame(sys.parent()),
       } else {
          idx <- colnames(sites$coords)
          if (!all(idx %in% colnames(control$z$monitor)))
-            stop("'z' monitor must be a logical value or matrix of coordinates")
+            stop("Coordinate names not found in 'z' monitor")
          val <- unique.sites(control$z$monitor[,idx,drop=FALSE])
          val <- merge(cbind(sites$coords, 1:nrow(sites$coords)),
                       cbind(val$coords, 1), by=idx, all.x = TRUE)
@@ -85,21 +86,24 @@ georamps <- function(fixed, random, correlation, data = sys.frame(sys.parent()),
       ## Order latent parameters as (z$monitor == T, z$monitor == F)
       idx <- order(control$z$monitor, decreasing = TRUE)
       control$z$monitor <- control$z$monitor[idx]
-      sites$coords <- sites$coords[idx, ]
-      sites$idx <- order(idx)[sites$idx]
+      sites$coords <- sites$coords[idx,,drop=FALSE]
+      sites$map <- sites$map[,idx,drop=FALSE]
 
       ## Initialize correlation structure
       correlation <- Initialize(correlation, data = as.data.frame(sites$coords))
 
       ## Matrix to map latent parameters to observed data
-      k <- model.matrix(~ factor(sites$idx) - 1)
-      kmat <- matrix(0, nrow(mfdata), nrow(sites$coords))
+      k <- sites$map
+      kmat <- Matrix(0, nrow(mfdata), nrow(sites$coords))
       kmat[idx1,] <- k[seq(length.out = sum(idx1)),]
       if (length(idx2) > 0) {
          idx <- aggregate$grid[idx2, aggregate$blockid]
-         kmat[match(sort(unique(idx)), mfdata[, aggregate$blockid]),] <-
-            t(model.matrix(~ factor(idx) - 1)) %*%
-            k[seq(sum(idx1) + 1, length.out = sum(idx2)),] / as.vector(table(idx))
+         val <- sort(unique(idx))
+         kmap <- Matrix(0, length(val), length(idx))
+         kmap[nrow(kmap) * (seq(idx) - 1) + match(idx, val)] <- 1
+         kmat[match(val, mfdata[, aggregate$blockid]),] <-
+            (kmap / tabulate(idx)) %*%
+               k[seq(sum(idx1) + 1, length.out = sum(idx2)),]
       }
 
       ## Indices to map spatial variances
@@ -111,19 +115,16 @@ georamps <- function(fixed, random, correlation, data = sys.frame(sys.parent()),
          stop("Differing spatial variances specified for measurements from the",
               " same site")
       else variance$spatial <- as.factor(levels(val)[idx])
-
-      kmat <- as(kmat, "dgCMatrix")
    }
 
    ## Structures for random effects parameters
    if (missing(random)) {
-      wmat <- matrix(numeric(0), 0, 0)
+      wmat <- Matrix(numeric(0), 0, 0)
    } else {
       ## Matrix to map random effects to observed data
-      g <- factor(getGroups(data, random)[as.numeric(rownames(mfdata))])
-      w <- model.matrix(~ g - 1)
-      wmat <- matrix(0, nrow(mfdata), ncol(w))
-      wmat[as.numeric(rownames(w)), ] <- w
+      w <- factor(getGroups(data, random)[as.numeric(rownames(mfdata))])
+      wmat <- Matrix(0, length(w), nlevels(w))
+      wmat[na.omit(seq(w) + nrow(wmat) * (as.numeric(w) - 1))] <- 1
 
       ## Indices to map random effects variances
       val <- if (is.null(variance$random)) factor(rep(1, nrow(mfdata)))
@@ -134,12 +135,10 @@ georamps <- function(fixed, random, correlation, data = sys.frame(sys.parent()),
          stop("Differing random effects variances specified for measurements",
               " within the same group")
       else variance$random <- as.factor(levels(val)[idx])
-
-      wmat <- as(wmat, "dgCMatrix")
    }
 
    ## Default values for weights if not supplied
-   if (is.null(weights)) weights <- rowSums(as(kmat, "lgCMatrix"))
+   if (is.null(weights)) weights <- rowSums(as(kmat, "lsparseMatrix"))
 
    ## Check parameter specifications against supplied data
    if (length(control$beta) != (n <- ncol(xmat)))
@@ -191,7 +190,7 @@ print.ramps <- function(x, ...)
 
    sigma2 <- params2kappa(params, x$control)
 
-   n <- sum(rowSums(as(x$kmat, "lgCMatrix")) > 1)
+   n <- sum(rowSums(as(x$kmat, "lsparseMatrix")) > 1)
    cat("\nMeasurements\n",
        " N = ", length(x$y), "\n",
        " Point Source = ", length(x$y) - n, "\n",

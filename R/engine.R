@@ -44,7 +44,7 @@ ramps.engine <- function(y, xmat, kmat, wmat, spcor, etype, ztype, retype,
    }
 
    ## Indicies of spatial parameters to monitor
-   sites <- unique.sites(as.matrix(kmat))
+   sites <- unique.sites(kmat)
    zidx <- seq(length.out = nzp)
    idx <- match(zidx, as.vector((sites$coords == 1) %*% 1:ncol(kmat)))
 
@@ -71,7 +71,7 @@ ramps.engine <- function(y, xmat, kmat, wmat, spcor, etype, ztype, retype,
       ## Reorder remaining data structures by idx
       y <- y[idx]
       if (ncol(xmat) > 0) xmat <- xmat[idx, , drop = FALSE]
-      sites$idx <- sites$idx[idx]
+      sites$map <- sites$map[idx, , drop = FALSE]
       if (ncol(wmat) > 0) wmat <- wmat[idx, , drop = FALSE]
       weights <- weights[idx]
       etype <- etype[idx]
@@ -82,8 +82,7 @@ ramps.engine <- function(y, xmat, kmat, wmat, spcor, etype, ztype, retype,
       X[1:n, seq(length.out = p)] <- xmat
       if (nzp > 0) {
          X[1:ny1, (p + 1):(p + nzp)] <- k11mat
-         X[(n + 1):(n + nzp), (p + 1):(p + nzp)] <-
-                                 as(Diagonal(x = rep(-1, nzp)), "sparseMatrix")
+         X[(n + 1):(n + nzp), (p + 1):(p + nzp)] <- Diagonal(x = rep(-1, nzp))
       }
       if (nzp > 0 && ny2 > 0) X[(ny1 + 1):n, (p + 1):(p + nzp)] <- k21mat
    } else if ((nzp > 0) && (control$mpdfun != "mpdbetaz")) {
@@ -93,8 +92,8 @@ ramps.engine <- function(y, xmat, kmat, wmat, spcor, etype, ztype, retype,
       zidx <- p + idx
 
       ## Construct matrices for mpdensity
-      xk1mat <- cBind(xmat, as(model.matrix(~ factor(sites$idx) - 1), "dgCMatrix"))
-      k2mat <- as(sites$coords, "dgCMatrix")
+      xk1mat <- cBind(xmat, sites$map)
+      k2mat <- sites$coords
    } else {
       pred <- ""
 
@@ -113,9 +112,8 @@ ramps.engine <- function(y, xmat, kmat, wmat, spcor, etype, ztype, retype,
          args$kmat <- kmat
       },
       mpdbetaz = {
-         args$xk1mat <-
-            cBind(xmat, as(model.matrix(~ factor(sites$idx) - 1), "dgCMatrix"))
-         args$k2mat <- as(sites$coords, "dgCMatrix")
+         args$xk1mat <- cBind(xmat, sites$map)
+         args$k2mat <- sites$coords
       }
    )
 
@@ -171,7 +169,10 @@ ramps.engine <- function(y, xmat, kmat, wmat, spcor, etype, ztype, retype,
          )
 
          ## Save model parameters
-         val <- c(params2phi(args$theta, control), sigma2.tot * kappa,
+         val <- c(params2phi(args$theta, control),
+                  sigma2.tot * kappa2kappa.e(kappa, control),
+                  sigma2.tot * kappa2kappa.z(kappa, control),
+                  sigma2.tot * kappa2kappa.re(kappa, control),
                   BETA[seq(length.out = p)])
          params[idx, ] <- val
          write.params(control$expand + i, val, control$file$params)

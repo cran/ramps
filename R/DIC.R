@@ -17,10 +17,9 @@ DIC.ramps <- function(object, ...)
                         object$retype, object$weights, object$control)
       },
       mpdbetaz = {
-         sites <- unique.sites(as.matrix(object$kmat))
-         xk1mat <- cBind(object$xmat,
-                      as(model.matrix(~ factor(sites$idx) - 1), "dgCMatrix"))
-         k2mat <- as(sites$coords, "dgCMatrix")
+         sites <- unique.sites(object$kmat)
+         xk1mat <- cBind(object$xmat, sites$map)
+         k2mat <- sites$coords
 
          val <- mpdbetaz(params, object$y, xk1mat, k2mat, object$wmat,
                          object$correlation, object$etype, object$ztype,

@@ -781,9 +781,8 @@ getCovariate.corRExpwr2Dt <- function(object, form = formula(object), data)
             }, metric = attr(object, "metric"), radius = attr(object, "radius"))
          x <- unlist(lapply(covar, attr, which = "dist"))
          minD <- ifelse(any(x > 0), min(x[x > 0]), 0)
-         t1 <- unlist(lapply(covar, attr, which = "t1"))
-         t2 <- unlist(lapply(covar, attr, which = "t2"))
-         x <- abs((t2 - t1) %*% c(0.5, 0.5))
+         x <- rapply(covar,
+            function(x) abs((attr(x, "t2") - attr(x, "t1")) %*% c(0.5, 0.5)))
          minD <- c(minD, ifelse(any(x > 0), min(x[x > 0]), 0))
       }
       attr(covar, "minD") <- minD
@@ -796,38 +795,33 @@ getCovariate.corRExpwr2Dt <- function(object, form = formula(object), data)
 corMatrix.corRExpwr2Dt <- function(object, covariate = getCovariate(object),
    corr = TRUE, ...)
 {
-   if (data.class(covariate) == "list") {
-      dist <- unlist(lapply(covariate, attr, which = "dist"))
-      t1 <- unlist(lapply(covariate, attr, which = "t1"))
-      t2 <- unlist(lapply(covariate, attr, which = "t2"))
-      len <- unlist(lapply(covariate, nrow))
-   } else {
-      dist <- attr(covariate, "dist")
-      t1 <- attr(covariate, "t1")
-      t2 <- attr(covariate, "t2")
-      len <- nrow(covariate)
-      names(len) <- 1
-   }
+   if (data.class(covariate) == "list") covar <- covariate
+   else covar <- list(covariate)
 
    par <- coef(object)
-   val <- cor.exp2dt(dist, t1, t2, par[1], par[2], par[3], par[4])
 
-   val <- split(val, rep(names(len), len * (len - 1) / 2))
+   val <- list()
    lD <- NULL
-   for(i in names(val)) {
-      x <- matrix(0, len[i], len[i])
-      x[lower.tri(x)] <- val[[i]]
+   for(i in seq(covar)) {
+      r <- cor.exp2dt(attr(covar[[i]], "dist"),
+                      attr(covar[[i]], "t1"), attr(covar[[i]], "t2"),
+                      par[1], par[2], par[3], par[4])
+      x <- matrix(0, nrow(covar[[i]]), nrow(covar[[i]]))
+      x[lower.tri(x)] <- r
+      idx <- ncol(covar[[i]]) + c(-1, 0)
       if (corr) {
          val[[i]] <- x + t(x)
-         diag(val[[i]]) <- 1
+         diag(val[[i]]) <- cor.exp2dt(0, covar[[i]][,idx], covar[[i]][,idx],
+                                      par[1], par[2], par[3], par[4])
       } else {
-         diag(x) <- 1
+         diag(x) <- cor.exp2dt(0, covar[[i]][,idx], covar[[i]][,idx],
+                               par[1], par[2], par[3], par[4])
          l <- chol(t(x))
-         val[[i]] <- t(backsolve(l, diag(len[i])))
+         val[[i]] <- t(backsolve(l, diag(length(covar[[i]]))))
          lD <- c(lD, diag(l))
       }
    }
-   if (length(len) == 1) val <- val[[1]]
+   if (length(val) == 1) val <- val[[1]]
    if (!is.null(lD)) attr(val, "logDet") <- -1 * sum(log(lD))
 
    val

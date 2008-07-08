@@ -8,12 +8,13 @@
 }
 
 \usage{
-   \method{predict}{ramps}(object, newdata, \dots)
+   \method{predict}{ramps}(object, newdata, type = c("response", "spatial", "error", "random"), \dots)
 }
 
 \arguments{
    \item{object}{object returned by \code{georamps}.}
    \item{newdata}{data frame containing covariate values for the main effect, unmeasured spatial coordinates, and (if applicable) spatial variance indices with which to predict.}
+   \item{type}{character string specifying the type of spatial prediction to perform.  The default value \code{"response"} provides spatial prediction which includes measurement error and non-spatial random effects; \code{"spatial"} excludes measurement error and non-spatial random effects from the prediction; \code{"error"} excludes non-spatial random effects; and \code{"random"} excludes measurement error.}
    \item{\dots}{some methods for this generic require additional arguments.  None are used in this method.}
 }
 
