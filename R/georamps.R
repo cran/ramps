@@ -83,6 +83,7 @@ georamps <- function(fixed, random, correlation, data = sys.frame(sys.parent()),
          n <- length(idx)
          control$z$monitor <- !is.na(val[order(val[, n+1]), n+2])
       }
+
       ## Order latent parameters as (z$monitor == T, z$monitor == F)
       idx <- order(control$z$monitor, decreasing = TRUE)
       control$z$monitor <- control$z$monitor[idx]
@@ -119,7 +120,7 @@ georamps <- function(fixed, random, correlation, data = sys.frame(sys.parent()),
 
    ## Structures for random effects parameters
    if (missing(random)) {
-      wmat <- Matrix(numeric(0), 0, 0)
+      wmat <- Matrix(numeric(0), nrow(mfdata), 0)
    } else {
       ## Matrix to map random effects to observed data
       w <- factor(getGroups(data, random)[as.numeric(rownames(mfdata))])

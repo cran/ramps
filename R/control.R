@@ -31,9 +31,8 @@ ramps.control <- function(iter = 1000, beta, sigma2.e, phi, sigma2.z, sigma2.re,
    else if (sigma2.re$prior != "invgamma")
       stop("Only inverse gamma priors allowed for 'sigma2.re'")
 
-   if (is.data.frame(z.monitor)) z.monitor <- as.matrix(z.monitor)
-   else if (!(is.logical(z.monitor) || is.matrix(z.monitor)))
-      stop("'z.monitor' must be a logical object or a matrix of coordinates")
+   if (!(class(z.monitor) %in% c("logical", "matrix", "data.frame")))
+      stop("'z.monitor' must be a logical vector or a dataset of coordinates")
 
    fnames <- list(params = NULL, z = NULL)
    if (!missing(file)) {

@@ -2,6 +2,10 @@
 ## window.ramps/window.predict.ramps - Time windows for ramps MCMC output
 ################################################################################
 
+.onLoad <- function(lib, pkg) {
+   setAs("matrix", "data.frame", function(from) as.data.frame(from))
+}
+
 window.ramps <- function(x, iter, ...)
 {
    idx <- match(iter, as.numeric(rownames(x$params)))
@@ -267,6 +271,7 @@ inbounds <- function(x, bounds)
 
    val
 }
+
 
 unique.sites <- function(x)
 {

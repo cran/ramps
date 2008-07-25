@@ -58,33 +58,25 @@ ramps.engine <- function(y, xmat, kmat, wmat, spcor, etype, ztype, retype,
       ## Extract matrix components for mpdpred
       val <- as.vector(kmat %*% as.numeric(!control$z$monitor)) == 0
       idx <- order(val, decreasing = TRUE)
-      ny1 <- sum(val)
-      ny2 <- n - ny1
-      r1 <- seq(length.out = ny1)
-      r2 <- seq(length(r1) + 1, length.out = ny2) 
-      c1 <- seq(length.out = sum(control$z$monitor))
-      c2 <- seq(length(c1) + 1, length.out = sum(!control$z$monitor))
-      k11mat <- kmat[idx[r1], c1]
-      k21mat <- kmat[idx[r2], c1]
-      k22mat <- kmat[idx[r2], c2]
+      nr1 <- sum(val)
+      r2 <- seq(nr1 + 1, length.out = nrow(kmat) - nr1)
+      c1 <- seq(length.out = nzp)
+      c2 <- seq(nzp + 1, length.out = ncol(kmat) - nzp)
 
-      ## Reorder remaining data structures by idx
+      ## Reorder existing data structures by idx
       y <- y[idx]
-      if (ncol(xmat) > 0) xmat <- xmat[idx, , drop = FALSE]
+      xmat <- xmat[idx, , drop = FALSE]
       sites$map <- sites$map[idx, , drop = FALSE]
-      if (ncol(wmat) > 0) wmat <- wmat[idx, , drop = FALSE]
+      wmat <- wmat[idx, , drop = FALSE]
       weights <- weights[idx]
       etype <- etype[idx]
 
-      ## Construct X and Y structures for mpdpred
+      ## Construct additional structures for mpdpred
       Y <- c(y, rep(0, nzp))
-      X <- Matrix(0, n + nzp, p + nzp)
-      X[1:n, seq(length.out = p)] <- xmat
-      if (nzp > 0) {
-         X[1:ny1, (p + 1):(p + nzp)] <- k11mat
-         X[(n + 1):(n + nzp), (p + 1):(p + nzp)] <- Diagonal(x = rep(-1, nzp))
-      }
-      if (nzp > 0 && ny2 > 0) X[(ny1 + 1):n, (p + 1):(p + nzp)] <- k21mat
+      X <- bdiag(xmat, Diagonal(x = -1, nzp))
+      X[1:n, zidx] <- kmat[idx, c1]
+      k22mat <- kmat[idx[r2], c2]
+
    } else if ((nzp > 0) && (control$mpdfun != "mpdbetaz")) {
       pred <- "mpdbetaz"
 
@@ -94,6 +86,7 @@ ramps.engine <- function(y, xmat, kmat, wmat, spcor, etype, ztype, retype,
       ## Construct matrices for mpdensity
       xk1mat <- cBind(xmat, sites$map)
       k2mat <- sites$coords
+
    } else {
       pred <- ""
 
