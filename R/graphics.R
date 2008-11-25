@@ -42,10 +42,10 @@ plot.default <- function(z, coords, type, col, func, sites, database, regions,
       stop("'func' must return a summary statistic of the MCMC sampler output")
 
    val <- as.image(mu, x = coords, nrow = resolution[2], ncol = resolution[1])
-   z <- image.smooth(val$z, dx = val$x[2] - val$x[1], dy = val$y[2] - val$y[1],
-           theta = bw * sqrt(diff(range(val$x))^2 + diff(range(val$y))^2) / 100)
+   fit <- image.smooth(val$z, dx = val$x[2] - val$x[1], dy = val$y[2] - val$y[1],
+             theta = bw * sqrt(diff(range(val$x))^2 + diff(range(val$y))^2) / 100)
 
-   args <- list(x = val$x, y = val$y, z = z, col = col, ...)
+   args <- list(x = val$x, y = val$y, z = fit$z, col = col, ...)
    val <- colnames(coords)
    if (is.null(args$xlab)) args$xlab <- val[1]
    if (is.null(args$ylab)) args$ylab <- val[2]
