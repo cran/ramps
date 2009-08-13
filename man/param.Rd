@@ -8,16 +8,16 @@
 }
 
 \usage{
-   param(init, prior = c("flat", "invgamma", "normal", "uniform"), tuning = 1,
+   param(init, prior = c("flat", "invgamma", "normal", "uniform", "user"), tuning,
          \dots)
 }
 
 \arguments{
    \item{init}{numerical vector of initial parameter values.  \code{NA} elements will be replaced with random draws from the prior distribution when possible.}
 
-   \item{prior}{character string specifying the prior distribution.  This must be one of \code{"flat"}, \code{"invgamma"}, \code{"normal"}, or \code{"uniform"}, with default \code{"flat"}, and may be abbreviated to a unique prefix.}
+   \item{prior}{character string specifying the prior distribution.  This must be one of \code{"flat"}, \code{"invgamma"}, \code{"normal"}, \code{"uniform"}, or \code{"user"}, with default \code{"flat"}, and may be abbreviated to a unique prefix.}
 
-   \item{tuning}{positive numerical values for tuning the MCMC sampler.}
+   \item{tuning}{numerical tuning values the slice-simplex routine in the MCMC sampler.}
 
    \item{\dots}{hyperparameters of the specified prior distribution.  See details below.}
 }
@@ -32,6 +32,8 @@
       \item{\code{"normal"}}{Normal with hyperparameters \code{mean} and \code{variance} such that \eqn{f(x) = (2 \pi)^{-n/2} |\Sigma|^{-1/2} \exp(-1/2 (x - \mu)' \Sigma^{-1} (x - \mu))}{(2*pi)^(-n/2) * det(variance)^(-1/2) * exp(-1/2 * t(x - mean) \%*\% solve(variance) \%*\% (x - mean))}. The \code{variance} hyperparameter must be positive definite and may be supplied either as a vector (independence) or a matrix.}
 
       \item{\code{"uniform"}}{Uniform with hyperparameters \code{min} and \code{max > min} such that \eqn{f(x) = 1 / (max - min)}{f(x) = 1 / (max - min)}.}
+
+      \item{\code{"user"}}{Use-defined function supplied as hyperparameter \code{f} which takes a single numeric vector of length and order equal to the associated model parameters and whose returns values are proportional to the prior distribution.}
    }
 
    The number of model parameters to be initialized is determined by \code{length(init)}. Missing values occurring in the supplied \code{init} vector will be replaced with draws from the prior distribution, for all but the \code{"flat"} specification.

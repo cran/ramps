@@ -59,7 +59,7 @@ mpdbeta <- function(theta, y, xmat, kmat, wmat, spcor, etype, ztype, retype,
    loglik <- -logsqrtdet - sum(log(diag(uXtSiginvX))) -
                (sum(shape) + (length(y) - p) / 2.0) *
                log(quadform / 2.0 + sum(sigma2scale(control) / kappa)) -
-               sum((shape + 1.0) * log(kappa))
+               sum((shape + 1.0) * log(kappa)) + log(control$phi$f(coef(spcor)))
 
    list(value = loglik, betahat = betahat, quadform = quadform,
         uXtSiginvX = uXtSiginvX, logsqrtdet = logsqrtdet)
@@ -107,7 +107,7 @@ mpdbeta2 <- function(theta, y, xmat, kmat, wmat, spcor, etype, ztype, retype,
    loglik <- logsqrtdet - sum(log(diag(uXtSiginvX))) -
                (sum(shape) + (length(y) - p) / 2.0) *
                log(quadform / 2.0 + sum(sigma2scale(control) / kappa)) -
-               sum((shape + 1.0) * log(kappa))
+               sum((shape + 1.0) * log(kappa)) + log(control$phi$f(coef(spcor)))
 
    list(value = loglik, betahat = betahat, quadform = quadform,
         uXtSiginvX = uXtSiginvX, logsqrtdet = -1.0 * logsqrtdet)
@@ -178,7 +178,7 @@ mpdbetaz <- function(theta, y, xk1mat, k2mat, wmat, spcor, etype, ztype, retype,
    loglik <- logsqrtdetinv - sum(log(diag(uSIGMA.22))) -
                sum(log(diag(uXtSiginvX))) - (sum(shape) + (n - p) / 2.0) *
                log(sum(quadform) / 2.0 + sum(sigma2scale(control) / kappa)) -
-               sum((shape + 1.0) * log(kappa))
+               sum((shape + 1.0) * log(kappa)) + log(control$phi$f(coef(spcor)))
 
    list(value = loglik, betahat = betahat, quadform = quadform,
         uXtSiginvX = uXtSiginvX, logsqrtdet = -1.0 * logsqrtdetinv)
@@ -230,7 +230,7 @@ mpdbetaz2 <- function(theta, y, xk1mat, k2mat, wmat, spcor, etype, ztype, retype
    loglik <- logsqrtdetinv + sum(log(diag(liSIGMA.22))) -
                sum(log(diag(uXtSiginvX))) - (sum(shape) + (n - p) / 2.0) *
                log(sum(quadform) / 2.0 + sum(sigma2scale(control) / kappa)) -
-               sum((shape + 1.0) * log(kappa))
+               sum((shape + 1.0) * log(kappa)) + log(control$phi$f(coef(spcor)))
 
    list(value = loglik, betahat = betahat, quadform = quadform,
         uXtSiginvX = uXtSiginvX, logsqrtdet = -1.0 * logsqrtdetinv)

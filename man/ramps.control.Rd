@@ -19,7 +19,7 @@
 
    \item{sigma2.e}{\code{'param'} object of initial values and hyperparameters for the measurement error variances.  Inverse-gamma priors are currently supported.  Argument is optional if no measurement error variances appear in the model.}
 
-   \item{phi}{\code{'param'} object of initial values and hyperparameters for the spatial correlation parameters.  Uniform priors are currently supported.  Argument is optional if no correlation parameters appear in the model.}
+   \item{phi}{\code{'param'} object of initial values and hyperparameters for the spatial correlation parameters.  Uniform and user-defined priors are currently supported.  Argument is optional if no correlation parameters appear in the model.}
 
    \item{sigma2.z}{\code{'param'} object of initial values and hyperparameters for the spatial variances.  Inverse-gamma priors are currently supported.  Argument is optional if no spatial variances appear in the model.}
 
@@ -33,7 +33,7 @@
 }
 
 \details{
-   Tuning parameters may be set for the \code{sigma2} and \code{phi} arguments via the \code{param} function.  These are used in the MCMC algorithm as factors by which the widths of the slice sampling windows are multiplied.  Separate tuning parameters may be set for each of the arguments.  However, only the minimum of user-specified \code{sigma2} tuning parameters is used in the sampling of those model parameters.
+   Tuning parameters may be set for the \code{sigma2} and \code{phi} arguments via the \code{param} function.  If a user-defined prior is specified, then tuning parameters must be supplied and are taken to be the initial widths of the slice sampling windows.  Otherwise, tuning parameters are taken to be factors by which the initial widths are multiplied.  Separate tuning parameters may be set for each of the arguments.  However, only the minimum of all \code{sigma2} tuning parameters is used in the sampling of those parameters.
 }
 
 \value{

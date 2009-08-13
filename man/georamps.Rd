@@ -11,7 +11,7 @@
 \usage{
    georamps(fixed, random, correlation, data, subset, weights,
             variance = list(fixed = ~ 1, random = ~ 1, spatial = ~ 1),
-            aggregate = list(grid = NULL, blockid = ""),
+            aggregate = list(grid = NULL, blockid = ""), kmat = NULL,
             control = ramps.control(\dots), contrasts = NULL, \dots)
 }
 
@@ -26,11 +26,13 @@
 
    \item{subset}{optional expression indicating the subset of rows in \code{data} that should be used in the fit. This can be a logical vector, or a numerical vector indicating which observation numbers are to be included, or a character vector of the row names to be included. All observations are included by default.}
 
-   \item{weights}{optional numerical vector of weights to be used in the fitting process. Defaults to a value of 1 for point-source measurements and the number of grid points for areal measurements (see the \code{aggregate} argument below).}
+   \item{weights}{optional numerical vector of measurement error variance (inverse) weights to be used in the fitting process. Defaults to a value of 1 for point-source measurements and the number of grid points for areal measurements (see the \code{aggregate} argument below).}
 
    \item{variance}{optional list of one-sided formulas, each of the form \code{~ g} where \code{g} defines a grouping factor for the following elements: \code{fixed} for measurement error variances; \code{random} for random effects error variances; and \code{spatial} for spatial variances.  A single variance is assumed in each case by default.}
 
    \item{aggregate}{optional list of elements: \code{grid} a data frame of coordinates to use for Monte Carlo integration over geographic blocks at which areal measurements are available; and \code{blockid} a character string specifying the column by which to merge the areal measurements in \code{data} with the grid coordinates in \code{grid}.  Merging is only performed for \code{blockid} values that are common to both datasets.  All observations in \code{data} are treated as point-source measurements by default.}
+   
+   \item{kmat}{optional \eqn{n \times s}{n * s} design matrix for mapping spatial sites to outcome responses, where \eqn{n} is the number of responses and \eqn{s} the number of unique sites.  Unique sites are ordered first according to those supplied to the \code{data} argument and second to those supplied to the \code{aggregate} argument.  Defaults to \code{kmat[i,j] = 1 / N[i]} if site \code{j} is one of \code{N[i]} measurement sites contributing to response \code{i}; otherwise \code{kmat[i,j] = 0}.  Rows or columns of zeros are not supported.}
 
    \item{control}{list of parameters for controlling the fitting process. See the \code{ramps.control} documentation for details.}
 
@@ -41,7 +43,7 @@
 
 \value{
    An object of class \code{'ramps'} containing the following elements:
-   \item{params}{\code{'mcmc'"} object of monitored model parameters with variable labels in the column names and MCMC iteration numbers in the row names.}
+   \item{params}{\code{'mcmc'} object of monitored model parameters with variable labels in the column names and MCMC iteration numbers in the row names.}
    \item{z}{\code{'mcmc'} object of monitored latent spatial parameters with variable labels in the column names and MCMC iteration numbers in the row names.}
    \item{loglik}{vector of data log-likelihood values at each MCMC iteration.}
    \item{evals}{vector of slice sampler evaluations at each MCMC iteration.}

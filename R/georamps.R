@@ -1,7 +1,7 @@
 georamps <- function(fixed, random, correlation, data = sys.frame(sys.parent()),
    subset, weights, variance = list(fixed = ~ 1, random = ~ 1, spatial = ~ 1),
-   aggregate = list(grid = NULL, blockid = ""), control = ramps.control(...),
-   contrasts = NULL, ...)
+   aggregate = list(grid = NULL, blockid = ""), kmat = NULL,
+	control = ramps.control(...), contrasts = NULL, ...)
 {
    ## Create data frame containing all relevant variables
    ## Random effects are added later
@@ -94,27 +94,40 @@ georamps <- function(fixed, random, correlation, data = sys.frame(sys.parent()),
       correlation <- Initialize(correlation, data = as.data.frame(sites$coords))
 
       ## Matrix to map latent parameters to observed data
-      k <- sites$map
-      kmat <- Matrix(0, nrow(mfdata), nrow(sites$coords))
-      kmat[idx1,] <- k[seq(length.out = sum(idx1)),]
-      if (length(idx2) > 0) {
-         idx <- aggregate$grid[idx2, aggregate$blockid]
-         val <- sort(unique(idx))
-         kmap <- Matrix(0, length(val), length(idx))
-         kmap[nrow(kmap) * (seq(idx) - 1) + match(idx, val)] <- 1
-         kmat[match(val, mfdata[, aggregate$blockid]),] <-
-            (kmap / tabulate(idx)) %*%
+      if (is.null(kmat)) {
+         k <- sites$map
+         kmat <- Matrix(0, nrow(mfdata), nrow(sites$coords))
+         kmat[idx1,] <- k[seq(length.out = sum(idx1)),]
+         if (length(idx2) > 0) {
+            idx <- aggregate$grid[idx2, aggregate$blockid]
+            val <- sort(unique(idx))
+            kmap <- Matrix(0, length(val), length(idx))
+            kmap[nrow(kmap) * (seq(idx) - 1) + match(idx, val)] <- 1
+            kmat[match(val, mfdata[, aggregate$blockid]),] <-
+               (kmap / tabulate(idx)) %*%
                k[seq(sum(idx1) + 1, length.out = sum(idx2)),]
+         }
+      } else {
+         n <- c(nrow(mfdata), nrow(sites$coords))
+         if (!(is(kmat, "matrix") || is(kmat, "Matrix")) || any(dim(kmat) != n))
+            stop("Supplied 'kmat' must be a matrix object of dimension ",
+                 n[1], " x ", n[2])
+         kmat <- as(kmat, "sparseMatrix")
+         k <- abs(kmat)
+         if (any(rowSums(k) == 0))
+            stop("Supplied 'kmat' should not contain rows of zeros")
+         if (any(colSums(k) == 0))
+            stop("Supplied 'kmat' should not contain columns of zeros")
       }
 
       ## Indices to map spatial variances
       val <- if (is.null(variance$spatial)) factor(rep(1, nrow(mfdata)))
              else factor(getCovariate(mfdata, variance$spatial))
-      idx <- unlist(apply(as.numeric(val) * (kmat > 0), 2, unique))
+      idx <- unlist(apply(as.numeric(val) * (kmat != 0), 2, unique))
       idx <- idx[idx > 0]
       if (length(idx) != ncol(kmat))
-         stop("Differing spatial variances specified for measurements from the",
-              " same site")
+         stop("Unsupported latent spatial structure.  Different spatial",
+              " variances assigned to measurements from the same site.")
       else variance$spatial <- as.factor(levels(val)[idx])
    }
 
@@ -133,8 +146,8 @@ georamps <- function(fixed, random, correlation, data = sys.frame(sys.parent()),
       idx <- unlist(apply(as.numeric(val) * (wmat > 0), 2, unique))
       idx <- idx[idx > 0]
       if (length(idx) != ncol(wmat))
-         stop("Differing random effects variances specified for measurements",
-              " within the same group")
+         stop("Unsupported random effects structure.  Different random effects",
+              " variances assigned to measurements within the same group.")
       else variance$random <- as.factor(levels(val)[idx])
    }
 

@@ -44,7 +44,7 @@ sliceSimplex <- function(theta, mpdfun, log=FALSE, f.theta, control, ...)
 
    ## interval for generating phi
    phi.old <- params2phi(theta, control)
-   width <- (control$phi$max - control$phi$min) * control$phi$tuning
+   width <- control$phi$tuning
    l <- phi.old - runif(length(phi.old), 0, width)
    r <- l + width
 
@@ -61,7 +61,7 @@ sliceSimplex <- function(theta, mpdfun, log=FALSE, f.theta, control, ...)
       kappa.cand <- as.vector(vertices %*% t(kappa.cand.b))
 
       # out of boundary indicator
-      ob.phi <- any(phi.cand < control$phi$min, phi.cand > control$phi$max)
+      ob.phi <- control$phi$f(phi.cand) <= 0
       ob.kappa <- min(kappa.cand) < 0 || max(kappa.cand) > 1
       ob <- ob.phi || ob.kappa
 
