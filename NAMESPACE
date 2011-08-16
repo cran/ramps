@@ -1,4 +1,4 @@
-import(Matrix, nlme)
+import(Matrix, nlme, methods)
 importFrom(stats, window)
 
 export(
