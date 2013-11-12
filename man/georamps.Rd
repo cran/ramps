@@ -84,6 +84,7 @@
 }
 
 \examples{
+\dontrun{
 ## Load the included uranium datasets for use in this example
 data(NURE)
 
@@ -179,6 +180,7 @@ plot(pred, func = function(x) exp(sd(x)),
      resolution = c(200, 150), bw = 5,
      main = "Posterior Standard Deviation",
      legend.args = list(text = "ppm", side = 3, line = 1))
+}
 }
 
 \keyword{models}

@@ -136,31 +136,40 @@ ramps.engine <- function(y, xmat, kmat, wmat, spcor, etype, ztype, retype,
          bs2 <- sum(sigma2scale(control) / kappa) + sum(curreval$quadform) / 2.0
          sigma2.tot <- 1.0 / rgamma(1, as2, bs2)
 
-         ## Draw beta parameters and calculate the likelihood
-         BETA <- curreval$betahat
-         val <- rnorm(length(BETA), sd = sqrt(sigma2.tot))
-         if (length(val) > 0) BETA <- BETA + solve(curreval$uXtSiginvX, val)
-
-         loglik[idx] <- -0.5 * n * log(sigma2.tot) - curreval$logsqrtdet -
-                           (curreval$quadform[1] + crossprod(val)) /
-                           (2.0 * sigma2.tot)
-
-         ## Draw z parameters if not already done so
+         ## Draw beta and z parameters
          switch(pred,
             mpdbetaz = {
-               val <- mpdbetaz(args$theta, y, xk1mat, k2mat, wmat, spcor,
-                               etype, ztype, retype, weights, control)
-               BETA <- val$betahat + solve(val$uXtSiginvX,
-                              rnorm(length(val$betahat), sd = sqrt(sigma2.tot)))
+              val <- mpdbetaz(args$theta, y, xk1mat, k2mat, wmat, spcor,
+                              etype, ztype, retype, weights, control)
+              BETA <- val$betahat +
+                solve(val$uXtSiginvX, rnorm(length(val$betahat), sd=sqrt(sigma2.tot)))
+              BETA0 <- head(BETA, p)
             },
             mpdpred = {
-               val <- mpdpred(args$theta, Y, X, k22mat, wmat, spcor, etype,
-                              ztype, retype, weights, control)
-               BETA <- val$betahat + solve(val$uXtSiginvX,
-                              rnorm(length(val$betahat), sd = sqrt(sigma2.tot)))
+              val <- mpdpred(args$theta, Y, X, k22mat, wmat, spcor, etype,
+                             ztype, retype, weights, control)
+              BETA <- val$betahat +
+                solve(val$uXtSiginvX, rnorm(length(val$betahat), sd=sqrt(sigma2.tot)))
+              BETA0 <- head(BETA, p)
+              if(length(curreval$betahat) > p) {
+                BETA0 <- if (nzp != ncol(kmat)) NULL
+                         else rBind(BETA0, kmat %*% tail(BETA, -p))
+              }
+            },
+            {
+              BETA <- curreval$betahat + solve(curreval$uXtSiginvX,
+                        rnorm(length(curreval$betahat), sd=sqrt(sigma2.tot)))
+              BETA0 <- BETA
             }
          )
-
+         
+         ## Calculate the likelihood
+         if (!is.null(BETA0)) {
+           loglik[idx] <- -0.5 * n * log(sigma2.tot) - curreval$logsqrtdet -
+             (crossprod(curreval$uXtSiginvX %*% (curreval$betahat - BETA0))[1]
+              + curreval$quadform[1]) / (2.0 * sigma2.tot)
+         }
+         
          ## Save model parameters
          val <- c(params2phi(args$theta, control),
                   sigma2.tot * kappa2kappa.e(kappa, control),
@@ -169,7 +178,6 @@ ramps.engine <- function(y, xmat, kmat, wmat, spcor, etype, ztype, retype,
                   BETA[seq(length.out = p)])
          params[idx, ] <- val
          write.params(control$expand + i, val, control$file$params)
-
          ## Save latent spatial parameters
          val <- BETA[zidx]
          z[idx, ] <- val

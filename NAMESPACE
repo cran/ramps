@@ -1,4 +1,4 @@
-import(Matrix, nlme, methods)
+import(coda, fields, maps, Matrix, nlme, methods)
 importFrom(stats, window)
 
 export(
