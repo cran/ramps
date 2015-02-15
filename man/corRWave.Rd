@@ -28,7 +28,7 @@
 }
 
 \value{
-   Object of class \code{'corRWave'}, also inheriting from class \code{'corSpatial'}, representing a sine wave spatial correlation structure.
+   Object of class \code{'corRWave'}, also inheriting from class \code{'corRSpatial'}, representing a sine wave spatial correlation structure.
 }
 
 \references{
@@ -42,9 +42,7 @@
 }
 
 \seealso{
-   \code{\link{corClasses}},
-   \code{\link[nlme]{Initialize.corStruct}},
-   \code{\link[nlme]{summary.corStruct}}
+   \code{\link{corRClasses}}
 }
 
 \examples{

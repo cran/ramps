@@ -28,7 +28,7 @@
 }
 
 \value{
-   Object of class \code{'corRExp2'}, inheriting from class \code{'corSpatioTemporal'}, representing a non-separable spatial correlation structure.
+   Object of class \code{'corRExp2'}, inheriting from class \code{'corRSpatioTemporal'}, representing a non-separable spatial correlation structure.
 }
 
 \references{
@@ -40,9 +40,7 @@
 }
 
 \seealso{
-   \code{\link{corClasses}},
-   \code{\link[nlme]{Initialize.corStruct}},
-   \code{\link[nlme]{summary.corStruct}}
+   \code{\link{corRClasses}}
 }
 
 \examples{
