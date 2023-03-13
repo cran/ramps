@@ -1,7 +1,7 @@
 Package: ramps
 Title: Bayesian Geostatistical Modeling with RAMPS
-Version: 0.6.17
-Date: 2022-08-24
+Version: 0.6.18
+Date: 2023-03-13
 Authors@R: c(person("Brian J", "Smith", role = c("aut", "cre"),
                     email = "brian-j-smith@uiowa.edu"),
              person("Jun", "Yan", role = "aut",
@@ -18,9 +18,9 @@ Description: Bayesian geostatistical modeling of Gaussian processes using a
 License: GPL-2
 URL: https://www.jstatsoft.org/v25/i10
 NeedsCompilation: no
-Packaged: 2022-08-24 17:39:20 UTC; bjsmith
+Packaged: 2023-03-13 13:30:00 UTC; bjsmith
 Author: Brian J Smith [aut, cre],
   Jun Yan [aut],
   Mary Kathryn Cowles [aut]
 Repository: CRAN
-Date/Publication: 2022-08-24 18:00:02 UTC
+Date/Publication: 2023-03-13 14:30:02 UTC
